@@ -1,34 +1,34 @@
 # Repo Status
 
 ## Current state
-This build folder is **not currently a git repository**.
+This build folder is now a **git repository on branch `main`**.
 
-That means:
-- there is no commit history yet for the MVP build work
-- there is no clean commit boundary to hand off yet
-- GitHub push/pull flow has not started from this folder
+Current reality:
+- repo initialized
+- `.gitignore` in place
+- first clean commit created
+- working tree currently clean
+- GitHub remote/push not configured yet
 
 ## Practical meaning
 Before Mac/Xcode handoff, the project still needs:
-1. repo initialization or placement inside the intended git repo
-2. a first clean commit boundary
-3. push to GitHub
-4. pull/open on Mac
+1. GitHub remote configured
+2. push to GitHub
+3. pull/open on Mac
 
-## Recommended first repo packaging sequence
-When ready to package:
-1. initialize or place this build folder inside the intended git repo
-2. use the included `.gitignore`
-3. verify which generated/runtime files should stay out of version control
-4. make first clean commit
-5. push to GitHub
-6. pull on Mac and start Xcode/backend validation there
+## Recommended next repo sequence
+1. add remote
+2. push `main`
+3. clone/pull on Mac
+4. start backend/Xcode validation there
 
 See also:
 - `FIRST_REPO_BOOTSTRAP.md`
 
 ## Current packaging improvements already landed
-- `.gitignore` now excludes obvious generated/runtime clutter like `backend/node_modules/` and `backend/.env`
+- `.gitignore` excludes obvious generated/runtime clutter like `backend/node_modules/` and `backend/.env`
+- repo initialized
+- first clean commit created
 
 ## Honest summary
-The code and docs are getting cleaner, but the project packaging/handoff layer is still incomplete.
+The packaging layer is now in much better shape. The remaining repo-side blocker is simply remote/push setup.
