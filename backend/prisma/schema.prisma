@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     String   @id @default(cuid())
+  authProviderId         String   @unique
+  timezone               String?
+  locale                 String?
+  onboardingStatus       String
+  healthConnectionStatus String
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  footwearItems          FootwearItem[]
+  wearEvents             WearEvent[]
+  assignments            Assignment[]
+  conditionLogs          ConditionLog[]
+  healthImportBatches    HealthImportBatch[]
+}
+
+model FootwearItem {
+  id                String   @id @default(cuid())
+  userId            String
+  brand             String
+  model             String
+  nickname          String?
+  category          String
+  purchaseDate      DateTime?
+  startUseDate      DateTime?
+  retireDate        DateTime?
+  targetSteps       Int?
+  targetDistanceKm  Float?
+  status            String
+  isDefaultFallback Boolean  @default(false)
+  photoUrl          String?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id])
+  assignments       Assignment[]
+  conditionLogs     ConditionLog[]
+  lifecycleSummary  LifecycleSummary?
+}
+
+model HealthImportBatch {
+  id             String   @id @default(cuid())
+  userId         String
+  importedAt     DateTime
+  sourceDevice   String?
+  startRange     DateTime
+  endRange       DateTime
+  importStatus   String
+  rawSummaryJson String?
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id])
+  wearEvents     WearEvent[]
+}
+
+model WearEvent {
+  id               String   @id @default(cuid())
+  userId           String
+  importBatchId    String?
+  eventDate        DateTime
+  startTime        DateTime?
+  endTime          DateTime?
+  eventType        String
+  stepsCount       Int?
+  distanceKm       Float?
+  assignmentStatus String
+  sourceLabel      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User               @relation(fields: [userId], references: [id])
+  importBatch      HealthImportBatch? @relation(fields: [importBatchId], references: [id])
+  assignment       Assignment?
+}
+
+model Assignment {
+  id                   String   @id @default(cuid())
+  userId               String
+  wearEventId          String   @unique
+  footwearItemId       String
+  assignmentMethod     String
+  assignmentConfidence Float?
+  confirmedByUser      Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user                 User         @relation(fields: [userId], references: [id])
+  wearEvent            WearEvent    @relation(fields: [wearEventId], references: [id])
+  footwearItem         FootwearItem @relation(fields: [footwearItemId], references: [id])
+}
+
+model ConditionLog {
+  id                     String   @id @default(cuid())
+  userId                 String
+  footwearItemId         String
+  comfortScore           Int
+  cushioningScore        Int
+  supportScore           Int
+  gripScore              Int
+  upperConditionScore    Int
+  waterproofingScore     Int?
+  overallConfidenceScore Int
+  painFlag               Boolean  @default(false)
+  notes                  String?
+  photoUrl               String?
+  loggedAt               DateTime @default(now())
+
+  user                   User         @relation(fields: [userId], references: [id])
+  footwearItem           FootwearItem @relation(fields: [footwearItemId], references: [id])
+}
+
+model LifecycleSummary {
+  id                           String   @id @default(cuid())
+  footwearItemId               String   @unique
+  totalSteps                   Int      @default(0)
+  totalDistanceKm              Float    @default(0)
+  assignedDaysCount            Int      @default(0)
+  lastUsedAt                   DateTime?
+  lifecycleProgressPct         Float?
+  estimatedRemainingSteps      Int?
+  estimatedRemainingDistanceKm Float?
+  retirementRiskLevel          String
+  confidenceScore              Float?
+  updatedAt                    DateTime @updatedAt
+
+  footwearItem                 FootwearItem @relation(fields: [footwearItemId], references: [id])
+}

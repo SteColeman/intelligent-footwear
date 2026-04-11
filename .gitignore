@@ -1,0 +1,20 @@
+# Node / backend
+backend/node_modules/
+backend/.env
+backend/dist/
+*.log
+
+# macOS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Swift / Xcode
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+
+# Misc
+coverage/
