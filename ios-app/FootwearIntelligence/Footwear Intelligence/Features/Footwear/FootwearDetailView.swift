@@ -68,14 +68,17 @@ struct FootwearDetailView: View {
             VStack(alignment: .leading, spacing: 24) {
                 premiumHero(for: item, lifecycle: lifecycle)
 
-                HStack(spacing: 14) {
-                    statCard(label: "Steps tracked", value: "\(lifecycle.totalSteps)")
-                    statCard(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
+                HStack(alignment: .top, spacing: 14) {
+                    statCard(label: "Steps tracked", value: "\(lifecycle.totalSteps)", caption: "logged to this pair")
+                    statCard(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm), caption: "captured so far")
                 }
+
+                editorialRiskSection(lifecycle: lifecycle)
 
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Condition history")
-                        .font(.headline)
+                        .font(.title3)
+                        .bold()
 
                     if !viewModel.hasConditionHistory {
                         Text("Condition check-ins will appear here once you start logging them.")
@@ -83,15 +86,14 @@ struct FootwearDetailView: View {
                             .softPanelStyle()
                     } else {
                         ForEach(viewModel.conditionLogs) { log in
-                            VStack(alignment: .leading, spacing: 12) {
+                            VStack(alignment: .leading, spacing: 14) {
                                 HStack(alignment: .top) {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(log.loggedAt.formatted(date: .abbreviated, time: .shortened))
                                             .font(.subheadline)
                                             .foregroundColor(.secondary)
-                                        Text("Confidence in continued use")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
+                                        Text(historyHeadline(for: log.overallConfidenceScore))
+                                            .font(.headline)
                                     }
 
                                     Spacer()
@@ -100,8 +102,8 @@ struct FootwearDetailView: View {
                                         .font(.caption.weight(.semibold))
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 7)
-                                        .background(Color.blue.opacity(0.12))
-                                        .foregroundColor(.blue)
+                                        .background(scoreFill(for: log.overallConfidenceScore))
+                                        .foregroundColor(scoreColor(for: log.overallConfidenceScore))
                                         .clipShape(Capsule())
                                 }
 
@@ -143,7 +145,7 @@ struct FootwearDetailView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.displayName)
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
                         .foregroundColor(Color.white.opacity(0.72))
@@ -163,8 +165,13 @@ struct FootwearDetailView: View {
             }
 
             VStack(alignment: .leading, spacing: 12) {
+                Text("Current read")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(Color.white.opacity(0.68))
+                    .textCase(.uppercase)
+
                 Text(SoftUtilityRiskTone.longLabel(for: lifecycle.retirementRiskLevel))
-                    .font(.headline)
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(.white)
 
                 if let confidenceScore = lifecycle.confidenceScore {
@@ -187,7 +194,7 @@ struct FootwearDetailView: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(item.displayName)
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundColor(.white)
                     Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
                         .foregroundColor(Color.white.opacity(0.72))
@@ -212,13 +219,35 @@ struct FootwearDetailView: View {
         .premiumHeroStyle()
     }
 
-    private func statCard(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func editorialRiskSection(lifecycle: LifecycleSummaryLite) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Lifecycle read")
+                .font(.title3)
+                .bold()
+
+            Text(SoftUtilityRiskTone.longLabel(for: lifecycle.retirementRiskLevel))
+                .font(.body)
+
+            Text("This is based on tracked wear and your latest condition signals, not a hard replacement rule.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(SoftUtilityRiskTone.fill(for: lifecycle.retirementRiskLevel))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+    }
+
+    private func statCard(label: String, value: String, caption: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+            Text(caption)
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .metricTileStyle()
     }
@@ -245,5 +274,29 @@ struct FootwearDetailView: View {
             .background(Color.white.opacity(0.12))
             .foregroundColor(.white)
             .clipShape(Capsule())
+    }
+
+    private func historyHeadline(for score: Int) -> String {
+        switch score {
+        case 1...2: return "This pair felt tired"
+        case 3: return "This pair felt mixed"
+        default: return "This pair felt solid"
+        }
+    }
+
+    private func scoreFill(for score: Int) -> Color {
+        switch score {
+        case 1...2: return Color.red.opacity(0.14)
+        case 3: return Color.orange.opacity(0.16)
+        default: return Color.green.opacity(0.14)
+        }
+    }
+
+    private func scoreColor(for score: Int) -> Color {
+        switch score {
+        case 1...2: return .red
+        case 3: return .orange
+        default: return .green
+        }
     }
 }

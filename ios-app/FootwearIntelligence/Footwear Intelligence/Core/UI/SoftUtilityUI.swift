@@ -34,14 +34,26 @@ struct ElevatedPanelModifier: ViewModifier {
 struct PremiumHeroModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(22)
+            .padding(24)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 LinearGradient(
-                    colors: [Color(red: 0.13, green: 0.18, blue: 0.16), Color(red: 0.24, green: 0.29, blue: 0.24)],
+                    colors: [Color(red: 0.12, green: 0.16, blue: 0.15), Color(red: 0.26, green: 0.31, blue: 0.27)],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
+            )
+            .overlay(
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(width: 180, height: 180)
+                        .offset(x: 120, y: -80)
+                    Circle()
+                        .fill(Color.white.opacity(0.05))
+                        .frame(width: 120, height: 120)
+                        .offset(x: 70, y: 100)
+                }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
