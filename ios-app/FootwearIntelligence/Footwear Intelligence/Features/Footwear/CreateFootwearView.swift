@@ -62,7 +62,7 @@ struct CreateFootwearView: View {
                         Task {
                             await viewModel.save(userId: userId)
                             if viewModel.didSave {
-                                session.completeOnboarding()
+                                await session.completeOnboarding()
                                 dismiss()
                             }
                         }

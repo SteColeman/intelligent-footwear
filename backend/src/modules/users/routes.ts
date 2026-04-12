@@ -40,4 +40,52 @@ export async function userRoutes(app: FastifyInstance) {
       healthConnectionStatus: user.healthConnectionStatus,
     };
   });
+
+  app.post('/me/onboarding-complete', async request => {
+    const body = z.object({ userId: z.string().min(1) }).parse(request.body);
+
+    const existing = await prisma.user.findUnique({
+      where: { id: body.userId },
+    });
+
+    if (!existing) {
+      throw new AppError('User not found', 404);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: body.userId },
+      data: {
+        onboardingStatus: 'onboarding_complete',
+      },
+    });
+
+    return {
+      id: user.id,
+      onboardingStatus: user.onboardingStatus,
+    };
+  });
+
+  app.post('/me/health-connected', async request => {
+    const body = z.object({ userId: z.string().min(1) }).parse(request.body);
+
+    const existing = await prisma.user.findUnique({
+      where: { id: body.userId },
+    });
+
+    if (!existing) {
+      throw new AppError('User not found', 404);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: body.userId },
+      data: {
+        healthConnectionStatus: 'connected',
+      },
+    });
+
+    return {
+      id: user.id,
+      healthConnectionStatus: user.healthConnectionStatus,
+    };
+  });
 }

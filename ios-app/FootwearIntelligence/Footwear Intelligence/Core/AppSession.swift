@@ -27,11 +27,31 @@ final class AppSession: ObservableObject {
         }
     }
 
-    func completeOnboarding() {
-        hasCompletedOnboarding = true
+    func completeOnboarding() async {
+        guard let userId else {
+            hasCompletedOnboarding = true
+            return
+        }
+
+        do {
+            try await APIClient.shared.markOnboardingComplete(userId: userId)
+            hasCompletedOnboarding = true
+        } catch {
+            bootstrapError = error.localizedDescription
+        }
     }
 
-    func markHealthConnected() {
-        healthConnectionStatus = "connected"
+    func markHealthConnected() async {
+        guard let userId else {
+            healthConnectionStatus = "connected"
+            return
+        }
+
+        do {
+            try await APIClient.shared.markHealthConnected(userId: userId)
+            healthConnectionStatus = "connected"
+        } catch {
+            bootstrapError = error.localizedDescription
+        }
     }
 }

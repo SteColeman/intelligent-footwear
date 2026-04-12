@@ -49,6 +49,28 @@ final class APIClient {
         try validate(response: response, data: data)
     }
 
+    func markOnboardingComplete(userId: String) async throws {
+        let url = baseURL.appendingPathComponent("me/onboarding-complete")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["userId": userId])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validate(response: response, data: data)
+    }
+
+    func markHealthConnected(userId: String) async throws {
+        let url = baseURL.appendingPathComponent("me/health-connected")
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(["userId": userId])
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validate(response: response, data: data)
+    }
+
     func fetchFootwear(userId: String) async throws -> [FootwearItem] {
         let url = baseURL
             .appendingPathComponent("footwear")

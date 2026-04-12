@@ -28,7 +28,7 @@ struct HealthPermissionView: View {
                         Task {
                             do {
                                 try await HealthKitService.shared.requestAuthorization()
-                                session.markHealthConnected()
+                                await session.markHealthConnected()
                             } catch {
                                 // keep onboarding moving even if permission is declined or unavailable
                             }
