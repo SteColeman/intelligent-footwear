@@ -1,8 +1,9 @@
 import Foundation
+import Combine
 
 @MainActor
-final class FootwearListViewModel: ObservableObject {
-    @Published var items: [FootwearItem] = []
+final class InsightsViewModel: ObservableObject {
+    @Published var summary: InsightSummary?
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -11,16 +12,12 @@ final class FootwearListViewModel: ObservableObject {
         errorMessage = nil
 
         do {
-            items = try await APIClient.shared.fetchFootwear(userId: userId)
+            summary = try await APIClient.shared.fetchInsights(userId: userId)
         } catch {
             errorMessage = error.localizedDescription
-            items = []
+            summary = nil
         }
 
         isLoading = false
-    }
-
-    var hasNoFootwear: Bool {
-        items.isEmpty && !isLoading && errorMessage == nil
     }
 }
