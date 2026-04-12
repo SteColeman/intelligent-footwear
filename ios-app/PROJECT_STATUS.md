@@ -1,9 +1,10 @@
 # iOS Project Status
 
 ## Current state
-The iOS side currently exists as a **structured SwiftUI source tree**, not yet as a checked-in `.xcodeproj` or `.xcworkspace`.
+The iOS side now includes a **working checked-in Xcode project container** plus the structured SwiftUI source tree.
 
 ## What exists now
+- working `.xcodeproj` checked into the repo
 - app entry and root navigation
 - boot/loading/error state handling
 - session bootstrap logic
@@ -19,15 +20,13 @@ The iOS side currently exists as a **structured SwiftUI source tree**, not yet a
 - slightly more informative onboarding + settings paths
 - HealthKit query scaffolding
 
-## What does not yet exist
-- actual Xcode project container
-- target membership wiring
-- signing/capabilities setup in a real target
-- real plist wiring in a built target
-- proof of successful compile in Xcode
+## What still does not yet exist
+- proof of stable end-to-end runtime across repeated test passes
+- polished Xcode project layout
+- final cleaned canonical iOS folder structure
 
 ## Honest interpretation
-This is past the idea stage and past raw planning, but still short of a real testable Apple build.
+This is no longer just a source-only Apple prototype. It has crossed into a buildable Xcode-backed prototype, but still needs runtime hardening and some repo/Xcode structure cleanup.
 
 ## Immediate next target
-Get the source tree into a real Xcode app target and remove obvious compile/handoff confusion before Mac-side testing.
+Keep validating the real runtime loop, then clean the remaining Xcode/repo structure rough edges without breaking the working build.
