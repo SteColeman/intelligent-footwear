@@ -37,9 +37,9 @@ That path is useful later for cleaner packaging/runtime validation once the data
 The prototype currently uses:
 - `demo-user`
 
-Bootstrap route creates the demo user with a more honest first-run state:
-- `onboardingStatus: onboarding_incomplete`
-- `healthConnectionStatus: not_connected`
+Bootstrap route behavior:
+- creates demo-user with honest first-run defaults if missing
+- does **not** reset onboarding/health state on every launch
 
 You can bootstrap it via:
 ```bash
@@ -114,5 +114,5 @@ Prototype backend supports:
 - Prisma client generation works
 - validation errors are surfaced more cleanly
 - root endpoint reflects connected-prototype state
-- demo bootstrap no longer pretends onboarding is already complete
+- demo bootstrap now preserves onboarding progress across relaunches
 - full smoke pass is still blocked here by missing PostgreSQL runtime

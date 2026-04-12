@@ -19,13 +19,12 @@ export async function userRoutes(app: FastifyInstance) {
   });
 
   app.post('/dev/bootstrap-demo-user', async () => {
-    const user = await prisma.user.upsert({
+    const existing = await prisma.user.findUnique({
       where: { authProviderId: 'demo-user' },
-      update: {
-        onboardingStatus: 'onboarding_incomplete',
-        healthConnectionStatus: 'not_connected',
-      },
-      create: {
+    });
+
+    const user = existing ?? await prisma.user.create({
+      data: {
         authProviderId: 'demo-user',
         onboardingStatus: 'onboarding_incomplete',
         healthConnectionStatus: 'not_connected',
