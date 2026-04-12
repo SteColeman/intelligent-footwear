@@ -5,37 +5,53 @@ struct WelcomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Spacer()
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    Spacer(minLength: 20)
 
-                Text("Track real-life footwear wear")
-                    .font(.largeTitle)
-                    .bold()
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Track the footwear you actually live in")
+                            .font(.largeTitle)
+                            .bold()
 
-                Text("Built for walking, hiking, and everyday wear — not just workouts.")
-                    .foregroundColor(.secondary)
+                        Text("Built for walking, hiking, commuting, and everyday wear — not just workouts.")
+                            .foregroundColor(.secondary)
+                    }
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("• Track wear from everyday movement")
-                    Text("• Log condition over time")
-                    Text("• See when footwear may be nearing end of life")
+                    softPanel {
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("What this app helps with")
+                                .font(.headline)
+                            Text("• keep track of what gets worn most")
+                            Text("• log how each pair is holding up")
+                            Text("• spot what may need attention next")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    NavigationLink {
+                        HealthPermissionView()
+                    } label: {
+                        Text("Get started")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
                 }
-
-                Spacer()
-
-                NavigationLink {
-                    HealthPermissionView()
-                } label: {
-                    Text("Get Started")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                }
+                .padding()
             }
-            .padding()
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Welcome")
         }
+    }
+
+    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

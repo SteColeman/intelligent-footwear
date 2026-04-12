@@ -17,16 +17,17 @@ The iOS side now includes a **working checked-in Xcode project container** plus 
 - condition-history loading path in footwear detail
 - cleaner assign/import/unassigned-wear flow structure
 - less scaffold-y app copy across the main screens
-- slightly more informative onboarding + settings paths
+- softer grouped-panel “Soft Utility” design pass across the main app surfaces
 - HealthKit query scaffolding
 
 ## What still does not yet exist
 - proof of stable end-to-end runtime across repeated test passes
 - polished Xcode project layout
 - final cleaned canonical iOS folder structure
+- reusable shared styling layer for the new UI direction
 
 ## Honest interpretation
-This is no longer just a source-only Apple prototype. It has crossed into a buildable Xcode-backed prototype, but still needs runtime hardening and some repo/Xcode structure cleanup.
+This is no longer just a source-only Apple prototype. It has crossed into a buildable Xcode-backed prototype with a first real design-direction pass, but still needs runtime hardening and some repo/Xcode structure cleanup.
 
 ## Immediate next target
-Keep validating the real runtime loop, then clean the remaining Xcode/repo structure rough edges without breaking the working build.
+Keep validating the real runtime loop, then reduce ad hoc UI implementation by extracting the new design direction into reusable shared styling patterns.

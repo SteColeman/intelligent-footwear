@@ -6,46 +6,89 @@ struct InsightsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Insights")
-                    .font(.title)
-                    .bold()
-
-                if let userId = session.userId {
-                    if viewModel.isLoading {
-                        ProgressView()
-                    } else if let summary = viewModel.summary {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Most worn: \(summary.mostWorn.count)")
-                            if let top = summary.mostWorn.first {
-                                Text("Top pair: \(top.displayName)")
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    if let userId = session.userId {
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding(.top, 40)
+                        } else if let summary = viewModel.summary {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Insights")
+                                    .font(.largeTitle)
+                                    .bold()
+                                Text("A softer read on what’s getting worn most and what may need attention soon.")
                                     .foregroundColor(.secondary)
                             }
 
-                            Text("Needs attention: \(summary.needsAttention.count)")
-                            if let attention = summary.needsAttention.first {
-                                Text("Watch: \(attention.displayName)")
-                                    .foregroundColor(.secondary)
+                            softPanel {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Most worn")
+                                        .font(.headline)
+                                    Text("\(summary.mostWorn.count) footwear item\(summary.mostWorn.count == 1 ? "" : "s") currently show the strongest wear history.")
+                                    if let top = summary.mostWorn.first {
+                                        Text("Top pair: \(top.displayName)")
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
                             }
 
-                            Text("Near retirement: \(summary.nearRetirement.count)")
-                                .foregroundColor(.secondary)
+                            softPanel {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Needs attention")
+                                        .font(.headline)
+                                    Text("\(summary.needsAttention.count) footwear item\(summary.needsAttention.count == 1 ? "" : "s") may be worth a closer look.")
+                                    if let attention = summary.needsAttention.first {
+                                        Text("Watch: \(attention.displayName)")
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            }
+
+                            softPanel {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Near retirement")
+                                        .font(.headline)
+                                    if summary.nearRetirement.isEmpty {
+                                        Text("Nothing looks close to retirement right now.")
+                                            .foregroundColor(.secondary)
+                                    } else {
+                                        Text("\(summary.nearRetirement.count) footwear item\(summary.nearRetirement.count == 1 ? "" : "s") may be approaching end of life.")
+                                        ForEach(summary.nearRetirement) { item in
+                                            Text(item.displayName)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        } else if let error = viewModel.errorMessage {
+                            softPanel {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Insights couldn’t load")
+                                        .font(.headline)
+                                    Text(error)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Insights")
+                                    .font(.largeTitle)
+                                    .bold()
+                                Text("Wear trends and lifecycle signals will appear here once your footwear and assignments build up.")
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                    } else if let error = viewModel.errorMessage {
-                        Text("Error: \(error)")
-                            .foregroundColor(.red)
                     } else {
-                        Text("Wear trends and lifecycle signals will appear here once your footwear and assignments build up.")
+                        Text("Bootstrapping user session…")
                             .foregroundColor(.secondary)
+                            .padding(.top, 30)
                     }
-                } else {
-                    Text("Bootstrapping user session…")
-                        .foregroundColor(.secondary)
                 }
-
-                Spacer()
+                .padding()
             }
-            .padding()
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Insights")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -53,5 +96,13 @@ struct InsightsView: View {
                 }
             }
         }
+    }
+
+    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

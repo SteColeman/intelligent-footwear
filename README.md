@@ -23,25 +23,25 @@ What exists now:
 - SwiftUI source tree for onboarding, Home, Footwear, Assign, Insights, Settings
 - HealthKit query/import scaffolding
 - Mac/Xcode handoff docs
+- initial UI direction guidance based on market/design research
 
 What does **not** exist yet:
 - validated DB-backed backend run in this Linux environment
-- checked-in `.xcodeproj` / `.xcworkspace`
-- confirmed Xcode compile/build result
-- full end-to-end validated loop
-- git repo / first clean commit boundary inside this build folder
+- fully hardened repeated runtime validation
+- final cleaned Xcode/repo structure
 
 ## Current nearest milestone
 Reach a **solid testing point** where:
 1. backend runs against a real PostgreSQL instance
 2. backend smoke path passes
-3. SwiftUI source is coherent enough for Xcode wrapping
-4. the prototype loop is ready for first serious Mac/Xcode testing
+3. SwiftUI/Xcode runtime holds up across repeated use
+4. the prototype loop is stable enough for ongoing MVP hardening
 
 ## Key docs
 - `HANDOFF_READINESS.md`
 - `MOVE_TO_MAC_THRESHOLD.md`
 - `FIRST_REPO_BOOTSTRAP.md`
+- `UI_DIRECTION_SUMMARY.md`
 - `VALIDATION_STATUS.md`
 - `PROTOTYPE_SANITY_CHECKLIST.md`
 - `RUN_PROTOTYPE.md`

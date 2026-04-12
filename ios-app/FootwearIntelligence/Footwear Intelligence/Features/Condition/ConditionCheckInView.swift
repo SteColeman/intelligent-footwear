@@ -11,27 +11,47 @@ struct ConditionCheckInView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("Condition") {
-                    Stepper("Comfort: \(viewModel.comfortScore)", value: $viewModel.comfortScore, in: 1...5)
-                    Stepper("Cushioning: \(viewModel.cushioningScore)", value: $viewModel.cushioningScore, in: 1...5)
-                    Stepper("Support: \(viewModel.supportScore)", value: $viewModel.supportScore, in: 1...5)
-                    Stepper("Grip: \(viewModel.gripScore)", value: $viewModel.gripScore, in: 1...5)
-                    Stepper("Upper condition: \(viewModel.upperConditionScore)", value: $viewModel.upperConditionScore, in: 1...5)
-                    Stepper("Confidence in continued use: \(viewModel.overallConfidenceScore)", value: $viewModel.overallConfidenceScore, in: 1...5)
-                }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Condition check-in")
+                            .font(.largeTitle)
+                            .bold()
+                        Text("A short record of how this pair is feeling and holding up right now.")
+                            .foregroundColor(.secondary)
+                    }
 
-                Section("Notes") {
-                    TextField("Optional notes", text: $viewModel.notes)
-                }
+                    softPanel {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text("Condition")
+                                .font(.headline)
+                            Stepper("Comfort: \(viewModel.comfortScore)", value: $viewModel.comfortScore, in: 1...5)
+                            Stepper("Cushioning: \(viewModel.cushioningScore)", value: $viewModel.cushioningScore, in: 1...5)
+                            Stepper("Support: \(viewModel.supportScore)", value: $viewModel.supportScore, in: 1...5)
+                            Stepper("Grip: \(viewModel.gripScore)", value: $viewModel.gripScore, in: 1...5)
+                            Stepper("Upper condition: \(viewModel.upperConditionScore)", value: $viewModel.upperConditionScore, in: 1...5)
+                            Stepper("Confidence in continued use: \(viewModel.overallConfidenceScore)", value: $viewModel.overallConfidenceScore, in: 1...5)
+                        }
+                    }
 
-                if let error = viewModel.errorMessage {
-                    Section {
-                        Text(error)
-                            .foregroundColor(.red)
+                    softPanel {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Notes")
+                                .font(.headline)
+                            TextField("Optional notes", text: $viewModel.notes)
+                        }
+                    }
+
+                    if let error = viewModel.errorMessage {
+                        softPanel {
+                            Text(error)
+                                .foregroundColor(.red)
+                        }
                     }
                 }
+                .padding()
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Condition Check-In")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -55,5 +75,13 @@ struct ConditionCheckInView: View {
                 }
             }
         }
+    }
+
+    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.secondarySystemGroupedBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 }

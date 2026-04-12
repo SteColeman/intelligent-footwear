@@ -37,6 +37,7 @@ Use this folder as the source of truth:
 - `Core/Models/UserProfile.swift`
 - `Core/Models/WearEvent.swift`
 - `Core/Networking/APIClient.swift`
+- `Core/UI/SoftUtilityUI.swift`
 - `Core/ViewModels/AssignViewModel.swift`
 - `Core/ViewModels/ConditionCheckInViewModel.swift`
 - `Core/ViewModels/CreateFootwearViewModel.swift`
