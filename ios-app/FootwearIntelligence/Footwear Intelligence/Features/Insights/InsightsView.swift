@@ -6,59 +6,77 @@ struct InsightsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 22) {
                     if let userId = session.userId {
                         if viewModel.isLoading {
                             ProgressView()
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 40)
                         } else if let summary = viewModel.summary {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Insights")
-                                    .font(.largeTitle)
-                                    .bold()
-                                Text("A softer read on what’s getting worn most and what may need attention soon.")
-                                    .foregroundColor(.secondary)
+                            insightsHero(summary: summary)
+
+                            HStack(spacing: 14) {
+                                headlineMetric(label: "Most worn", value: "\(summary.mostWorn.count)", caption: "pairs with strongest wear history")
+                                headlineMetric(label: "Watch list", value: "\(summary.needsAttention.count)", caption: "pairs worth checking soon")
                             }
 
-                            VStack(alignment: .leading, spacing: 10) {
+                            VStack(alignment: .leading, spacing: 14) {
                                 Text("Most worn")
-                                    .font(.headline)
-                                Text("\(summary.mostWorn.count) footwear item\(summary.mostWorn.count == 1 ? "" : "s") currently show the strongest wear history.")
-                                if let top = summary.mostWorn.first {
-                                    Text("Top pair: \(top.displayName)")
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .softPanelStyle()
+                                    .font(.title3)
+                                    .bold()
 
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Needs attention")
-                                    .font(.headline)
-                                Text("\(summary.needsAttention.count) footwear item\(summary.needsAttention.count == 1 ? "" : "s") may be worth a closer look.")
-                                if let attention = summary.needsAttention.first {
-                                    Text("Watch: \(attention.displayName)")
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                            .softPanelStyle()
-
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Near retirement")
-                                    .font(.headline)
-                                if summary.nearRetirement.isEmpty {
-                                    Text("Nothing looks close to retirement right now.")
-                                        .foregroundColor(.secondary)
+                                if summary.mostWorn.isEmpty {
+                                    emptyPanel(text: "Wear ranking will appear once more activity has been assigned.")
                                 } else {
-                                    Text("\(summary.nearRetirement.count) footwear item\(summary.nearRetirement.count == 1 ? "" : "s") may be approaching end of life.")
-                                    ForEach(summary.nearRetirement) { item in
-                                        Text(item.displayName)
-                                            .foregroundColor(.secondary)
+                                    ForEach(summary.mostWorn) { item in
+                                        insightRow(
+                                            title: item.displayName,
+                                            subtitle: item.category.replacingOccurrences(of: "_", with: " ").capitalized,
+                                            tone: item.lifecycleSummary.map { SoftUtilityRiskTone.color(for: $0.retirementRiskLevel) } ?? .secondary,
+                                            detail: item.lifecycleSummary.map { SoftUtilityRiskTone.shortLabel(for: $0.retirementRiskLevel) } ?? "No lifecycle signal yet"
+                                        )
                                     }
                                 }
                             }
-                            .softPanelStyle()
+
+                            VStack(alignment: .leading, spacing: 14) {
+                                Text("Needs attention")
+                                    .font(.title3)
+                                    .bold()
+
+                                if summary.needsAttention.isEmpty {
+                                    emptyPanel(text: "Nothing is standing out as concerning right now.")
+                                } else {
+                                    ForEach(summary.needsAttention) { item in
+                                        insightRow(
+                                            title: item.displayName,
+                                            subtitle: "Worth a closer look",
+                                            tone: .orange,
+                                            detail: item.lifecycleSummary.map { SoftUtilityRiskTone.shortLabel(for: $0.retirementRiskLevel) } ?? "Attention signal detected"
+                                        )
+                                    }
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: 14) {
+                                Text("Near retirement")
+                                    .font(.title3)
+                                    .bold()
+
+                                if summary.nearRetirement.isEmpty {
+                                    emptyPanel(text: "Nothing looks close to retirement right now.")
+                                } else {
+                                    ForEach(summary.nearRetirement) { item in
+                                        insightRow(
+                                            title: item.displayName,
+                                            subtitle: "Approaching end of life",
+                                            tone: .red,
+                                            detail: item.lifecycleSummary.map { SoftUtilityRiskTone.longLabel(for: $0.retirementRiskLevel) } ?? "May be nearing end of life"
+                                        )
+                                    }
+                                }
+                            }
                         } else if let error = viewModel.errorMessage {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Insights couldn’t load")
@@ -84,7 +102,13 @@ struct InsightsView: View {
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .navigationTitle("Insights")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -92,5 +116,81 @@ struct InsightsView: View {
                 }
             }
         }
+    }
+
+    private func insightsHero(summary: InsightsSummary) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Insights")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text("A softer read on what’s getting worn most, what’s beginning to drift, and what may need attention soon.")
+                .foregroundColor(Color.white.opacity(0.76))
+
+            HStack(spacing: 10) {
+                heroChip(label: "\(summary.mostWorn.count) most worn")
+                heroChip(label: "\(summary.nearRetirement.count) near retirement")
+            }
+        }
+        .premiumHeroStyle()
+    }
+
+    private func headlineMetric(label: String, value: String, caption: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+            Text(caption)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .metricTileStyle()
+    }
+
+    private func emptyPanel(text: String) -> some View {
+        Text(text)
+            .foregroundColor(.secondary)
+            .softPanelStyle()
+    }
+
+    private func insightRow(title: String, subtitle: String, tone: Color, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 14) {
+            Circle()
+                .fill(tone.opacity(0.14))
+                .frame(width: 46, height: 46)
+                .overlay(
+                    Circle()
+                        .stroke(tone.opacity(0.24), lineWidth: 1)
+                )
+                .overlay(
+                    Image(systemName: "waveform.path.ecg")
+                        .foregroundColor(tone)
+                )
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.headline)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Text(detail)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundColor(tone)
+            }
+
+            Spacer()
+        }
+        .elevatedPanelStyle()
+    }
+
+    private func heroChip(label: String) -> some View {
+        Text(label)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.12))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
     }
 }

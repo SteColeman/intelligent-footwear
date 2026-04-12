@@ -11,47 +11,48 @@ struct ConditionCheckInView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Condition check-in")
-                            .font(.largeTitle)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 22) {
+                    checkInHero
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Condition")
+                            .font(.title3)
                             .bold()
-                        Text("A short record of how this pair is feeling and holding up right now.")
-                            .foregroundColor(.secondary)
-                    }
 
-                    softPanel {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Text("Condition")
-                                .font(.headline)
-                            Stepper("Comfort: \(viewModel.comfortScore)", value: $viewModel.comfortScore, in: 1...5)
-                            Stepper("Cushioning: \(viewModel.cushioningScore)", value: $viewModel.cushioningScore, in: 1...5)
-                            Stepper("Support: \(viewModel.supportScore)", value: $viewModel.supportScore, in: 1...5)
-                            Stepper("Grip: \(viewModel.gripScore)", value: $viewModel.gripScore, in: 1...5)
-                            Stepper("Upper condition: \(viewModel.upperConditionScore)", value: $viewModel.upperConditionScore, in: 1...5)
-                            Stepper("Confidence in continued use: \(viewModel.overallConfidenceScore)", value: $viewModel.overallConfidenceScore, in: 1...5)
-                        }
+                        scoreRow(title: "Comfort", value: $viewModel.comfortScore)
+                        scoreRow(title: "Cushioning", value: $viewModel.cushioningScore)
+                        scoreRow(title: "Support", value: $viewModel.supportScore)
+                        scoreRow(title: "Grip", value: $viewModel.gripScore)
+                        scoreRow(title: "Upper condition", value: $viewModel.upperConditionScore)
+                        scoreRow(title: "Confidence in continued use", value: $viewModel.overallConfidenceScore)
                     }
+                    .elevatedPanelStyle()
 
-                    softPanel {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Notes")
-                                .font(.headline)
-                            TextField("Optional notes", text: $viewModel.notes)
-                        }
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Notes")
+                            .font(.headline)
+                        TextField("Optional notes", text: $viewModel.notes, axis: .vertical)
+                            .textFieldStyle(.roundedBorder)
+                            .lineLimit(3...6)
                     }
+                    .softPanelStyle()
 
                     if let error = viewModel.errorMessage {
-                        softPanel {
-                            Text(error)
-                                .foregroundColor(.red)
-                        }
+                        Text(error)
+                            .foregroundColor(.red)
+                            .softPanelStyle()
                     }
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .navigationTitle("Condition Check-In")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -77,11 +78,61 @@ struct ConditionCheckInView: View {
         }
     }
 
-    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    private var checkInHero: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Condition check-in")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text("A short record of how this pair is feeling and holding up right now.")
+                .foregroundColor(Color.white.opacity(0.76))
+            Text("Quick but useful")
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color.white.opacity(0.12))
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+        }
+        .premiumHeroStyle()
+    }
+
+    private func scoreRow(title: String, value: Binding<Int>) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(title)
+                    .font(.headline)
+                Spacer()
+                Text("\(value.wrappedValue)/5")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundColor(scoreColor(for: value.wrappedValue))
+            }
+
+            Stepper(value: value, in: 1...5) {
+                Text(scoreCaption(for: value.wrappedValue))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(14)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func scoreCaption(for score: Int) -> String {
+        switch score {
+        case 1: return "Very poor"
+        case 2: return "Below par"
+        case 3: return "Holding up"
+        case 4: return "Good"
+        default: return "Very good"
+        }
+    }
+
+    private func scoreColor(for score: Int) -> Color {
+        switch score {
+        case 1...2: return .red
+        case 3: return .orange
+        default: return .green
+        }
     }
 }

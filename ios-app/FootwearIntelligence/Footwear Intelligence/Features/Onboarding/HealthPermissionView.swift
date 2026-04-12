@@ -5,27 +5,19 @@ struct HealthPermissionView: View {
     @State private var showFirstFootwearPrompt = false
 
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Connect Apple Health")
-                        .font(.largeTitle)
+                healthHero
+
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("What gets used")
+                        .font(.title3)
                         .bold()
-
-                    Text("Use steps, distance, and walking or hiking activity to help track real-life footwear wear more automatically.")
-                        .foregroundColor(.secondary)
+                    onboardingBullet(text: "steps")
+                    onboardingBullet(text: "walking and running distance")
+                    onboardingBullet(text: "relevant activity like walking or hiking")
                 }
-
-                softPanel {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("What gets used")
-                            .font(.headline)
-                        Text("• steps")
-                        Text("• walking and running distance")
-                        Text("• relevant activity like walking or hiking")
-                            .foregroundColor(.secondary)
-                    }
-                }
+                .elevatedPanelStyle()
 
                 VStack(spacing: 12) {
                     Button("Connect Apple Health") {
@@ -43,7 +35,7 @@ struct HealthPermissionView: View {
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     Button("Skip for now") {
                         showFirstFootwearPrompt = true
@@ -54,7 +46,13 @@ struct HealthPermissionView: View {
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground))
+        .background(
+            LinearGradient(
+                colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
         .navigationTitle("Apple Health")
         .navigationDestination(isPresented: $showFirstFootwearPrompt) {
             FirstFootwearPromptView()
@@ -62,11 +60,33 @@ struct HealthPermissionView: View {
         }
     }
 
-    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    private var healthHero: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Connect Apple Health")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+            Text("Use steps, distance, and walking or hiking activity to help track real-life footwear wear more automatically.")
+                .foregroundColor(Color.white.opacity(0.76))
+
+            Text("Optional but useful")
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color.white.opacity(0.12))
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+        }
+        .premiumHeroStyle()
+    }
+
+    private func onboardingBullet(text: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundColor(.green)
+            Text(text)
+                .foregroundColor(.primary)
+            Spacer()
+        }
     }
 }

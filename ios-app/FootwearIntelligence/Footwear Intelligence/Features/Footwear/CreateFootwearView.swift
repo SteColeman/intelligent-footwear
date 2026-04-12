@@ -7,45 +7,47 @@ struct CreateFootwearView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Add footwear")
-                            .font(.largeTitle)
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 22) {
+                    createHero
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("Footwear details")
+                            .font(.title3)
                             .bold()
-                        Text("Start with the pair you wear most often so the app can build a useful history around it.")
-                            .foregroundColor(.secondary)
-                    }
 
-                    softPanel {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Text("Footwear details")
-                                .font(.headline)
+                        TextField("Brand", text: $viewModel.brand)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Model", text: $viewModel.model)
+                            .textFieldStyle(.roundedBorder)
+                        TextField("Nickname (optional)", text: $viewModel.nickname)
+                            .textFieldStyle(.roundedBorder)
 
-                            TextField("Brand", text: $viewModel.brand)
-                            TextField("Model", text: $viewModel.model)
-                            TextField("Nickname (optional)", text: $viewModel.nickname)
-
-                            Picker("Category", selection: $viewModel.category) {
-                                ForEach(viewModel.categories, id: \.self) { category in
-                                    Text(category.replacingOccurrences(of: "_", with: " ").capitalized).tag(category)
-                                }
+                        Picker("Category", selection: $viewModel.category) {
+                            ForEach(viewModel.categories, id: \.self) { category in
+                                Text(category.replacingOccurrences(of: "_", with: " ").capitalized).tag(category)
                             }
-
-                            Toggle("Use as default footwear", isOn: $viewModel.isDefaultFallback)
                         }
+
+                        Toggle("Use as default footwear", isOn: $viewModel.isDefaultFallback)
                     }
+                    .elevatedPanelStyle()
 
                     if let error = viewModel.errorMessage {
-                        softPanel {
-                            Text(error)
-                                .foregroundColor(.red)
-                        }
+                        Text(error)
+                            .foregroundColor(.red)
+                            .softPanelStyle()
                     }
                 }
                 .padding()
             }
-            .background(Color(.systemGroupedBackground))
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .navigationTitle("Add Footwear")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -72,11 +74,21 @@ struct CreateFootwearView: View {
         }
     }
 
-    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    private var createHero: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Add footwear")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text("Start with the pair you wear most often so the app can build a useful history around it.")
+                .foregroundColor(Color.white.opacity(0.76))
+            Text("Start with your real default")
+                .font(.caption.weight(.semibold))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color.white.opacity(0.12))
+                .foregroundColor(.white)
+                .clipShape(Capsule())
+        }
+        .premiumHeroStyle()
     }
 }
