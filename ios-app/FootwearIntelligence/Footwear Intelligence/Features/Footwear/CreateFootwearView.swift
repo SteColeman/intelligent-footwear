@@ -43,6 +43,12 @@ struct CreateFootwearView: View {
                             .foregroundColor(.red)
                             .softPanelStyle()
                     }
+
+                    if let sessionError = session.bootstrapError {
+                        Text(sessionError)
+                            .foregroundColor(.red)
+                            .softPanelStyle()
+                    }
                 }
                 .padding()
             }
@@ -61,8 +67,11 @@ struct CreateFootwearView: View {
 
                         Task {
                             await viewModel.save(userId: userId)
-                            if viewModel.didSave {
-                                await session.completeOnboarding()
+                            guard viewModel.didSave else { return }
+
+                            await session.completeOnboarding()
+
+                            if session.hasCompletedOnboarding {
                                 dismiss()
                             }
                         }

@@ -27,7 +27,7 @@ struct SettingsView: View {
                             Task {
                                 do {
                                     try await HealthKitService.shared.requestAuthorization()
-                                    session.markHealthConnected()
+                                    await session.markHealthConnected()
                                     healthConnectError = nil
                                 } catch {
                                     healthConnectError = error.localizedDescription
