@@ -63,8 +63,8 @@ struct FootwearListView: View {
                                                             Text("\(lifecycle.totalSteps) steps tracked")
                                                             Text(String(format: "%.1f km logged", lifecycle.totalDistanceKm))
                                                                 .foregroundColor(.secondary)
-                                                            Text(riskLabel(for: lifecycle.retirementRiskLevel))
-                                                                .foregroundColor(riskColor(for: lifecycle.retirementRiskLevel))
+                                                            Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+                                                                .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
                                                         }
                                                         .font(.subheadline)
                                                     } else {
@@ -72,10 +72,7 @@ struct FootwearListView: View {
                                                             .foregroundColor(.secondary)
                                                     }
                                                 }
-                                                .padding(16)
-                                                .frame(maxWidth: .infinity, alignment: .leading)
-                                                .background(Color(.secondarySystemGroupedBackground))
-                                                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                                .softPanelStyle()
                                             }
 
                                             Button {
@@ -93,10 +90,7 @@ struct FootwearListView: View {
                                         Text(error)
                                             .foregroundColor(.red)
                                     }
-                                    .padding(16)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.secondarySystemGroupedBackground))
-                                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                    .softPanelStyle()
                                 }
                             }
                             .padding()
@@ -141,22 +135,6 @@ struct FootwearListView: View {
                     await viewModel.load(userId: userId)
                 }
             }
-        }
-    }
-
-    private func riskLabel(for level: String) -> String {
-        switch level.lowercased() {
-        case "high": return "Needs attention soon"
-        case "medium": return "Worth keeping an eye on"
-        default: return "Holding up well"
-        }
-    }
-
-    private func riskColor(for level: String) -> Color {
-        switch level.lowercased() {
-        case "high": return .red
-        case "medium": return .orange
-        default: return .green
         }
     }
 }

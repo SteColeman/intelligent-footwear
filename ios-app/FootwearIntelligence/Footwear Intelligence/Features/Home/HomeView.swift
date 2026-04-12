@@ -14,55 +14,37 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 40)
                         } else if let summary = viewModel.summary {
-                            VStack(alignment: .leading, spacing: 6) {
-                                Text("Today")
-                                    .font(.largeTitle)
-                                    .bold()
-                                Text("A quiet view of today’s movement and what still needs assigning.")
-                                    .foregroundColor(.secondary)
-                            }
+                            homeHero(summary: summary)
 
-                            softPanel {
-                                VStack(alignment: .leading, spacing: 14) {
-                                    Text("Today’s activity")
-                                        .font(.headline)
-
-                                    HStack(spacing: 24) {
-                                        statBlock(label: "Steps", value: "\(summary.today.steps)")
-                                        statBlock(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm))
-                                    }
-                                }
-                            }
+                            activityPanel(summary: summary)
 
                             if let currentDefault = summary.currentDefault {
-                                softPanel {
-                                    VStack(alignment: .leading, spacing: 10) {
-                                        Text("Default footwear")
-                                            .font(.headline)
-                                        Text(currentDefault.displayName)
-                                            .font(.title3)
-                                        Text("Used as the fallback when you want wear to land somewhere predictable.")
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                            }
-
-                            softPanel {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    Text("Needs review")
+                                    Text("Default footwear")
                                         .font(.headline)
+                                    Text(currentDefault.displayName)
+                                        .font(.title3)
+                                    Text("Used as the fallback when you want wear to land somewhere predictable.")
+                                        .foregroundColor(.secondary)
+                                }
+                                .elevatedPanelStyle()
+                            }
 
-                                    if summary.unassignedWear.count > 0 {
-                                        Text("\(summary.unassignedWear.count) wear event\(summary.unassignedWear.count == 1 ? "" : "s") still need assigning.")
-                                        Text(String(format: "That currently represents %.1f km of unassigned movement.", summary.unassignedWear.distanceKm))
-                                            .foregroundColor(.secondary)
-                                    } else {
-                                        Text("Everything imported so far has been assigned.")
-                                        Text("Your daily view is up to date.")
-                                            .foregroundColor(.secondary)
-                                    }
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Needs review")
+                                    .font(.headline)
+
+                                if summary.unassignedWear.count > 0 {
+                                    Text("\(summary.unassignedWear.count) wear event\(summary.unassignedWear.count == 1 ? "" : "s") still need assigning.")
+                                    Text(String(format: "That currently represents %.1f km of unassigned movement.", summary.unassignedWear.distanceKm))
+                                        .foregroundColor(.secondary)
+                                } else {
+                                    Text("Everything imported so far has been assigned.")
+                                    Text("Your daily view is up to date.")
+                                        .foregroundColor(.secondary)
                                 }
                             }
+                            .softPanelStyle()
 
                             if !summary.activeFootwear.isEmpty {
                                 VStack(alignment: .leading, spacing: 12) {
@@ -70,20 +52,19 @@ struct HomeView: View {
                                         .font(.headline)
 
                                     ForEach(summary.activeFootwear) { item in
-                                        softPanel {
-                                            VStack(alignment: .leading, spacing: 8) {
-                                                Text(item.displayName)
-                                                    .font(.headline)
-                                                Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                                                    .foregroundColor(.secondary)
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            Text(item.displayName)
+                                                .font(.headline)
+                                            Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                                .foregroundColor(.secondary)
 
-                                                if let lifecycle = item.lifecycleSummary {
-                                                    Text("\(lifecycle.totalSteps) steps tracked")
-                                                    Text(riskLabel(for: lifecycle.retirementRiskLevel))
-                                                        .foregroundColor(riskColor(for: lifecycle.retirementRiskLevel))
-                                                }
+                                            if let lifecycle = item.lifecycleSummary {
+                                                Text("\(lifecycle.totalSteps) steps tracked")
+                                                Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+                                                    .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
                                             }
                                         }
+                                        .softPanelStyle()
                                     }
                                 }
                             }
@@ -136,38 +117,47 @@ struct HomeView: View {
         }
     }
 
+    private func homeHero(summary: HomeSummary) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Today")
+                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text("A calm view of movement, footwear in rotation, and anything that still needs your attention.")
+                .foregroundColor(Color.white.opacity(0.74))
+
+            HStack(spacing: 10) {
+                heroChip(label: "\(summary.activeFootwear.count) active")
+                heroChip(label: "\(summary.unassignedWear.count) to review")
+            }
+        }
+        .premiumHeroStyle()
+    }
+
+    private func activityPanel(summary: HomeSummary) -> some View {
+        HStack(spacing: 14) {
+            statBlock(label: "Steps", value: "\(summary.today.steps)")
+            statBlock(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm))
+        }
+    }
+
     private func statBlock(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.title3)
-                .bold()
+                .font(.system(size: 22, weight: .bold, design: .rounded))
         }
+        .metricTileStyle()
     }
 
-    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-    }
-
-    private func riskLabel(for level: String) -> String {
-        switch level.lowercased() {
-        case "high": return "Needs attention soon"
-        case "medium": return "Worth keeping an eye on"
-        default: return "Holding up well"
-        }
-    }
-
-    private func riskColor(for level: String) -> Color {
-        switch level.lowercased() {
-        case "high": return .red
-        case "medium": return .orange
-        default: return .green
-        }
+    private func heroChip(label: String) -> some View {
+        Text(label)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.12))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
     }
 }

@@ -17,8 +17,8 @@ struct FootwearDetailView: View {
                     .padding(.top, 30)
             }
         }
-        .navigationTitle(viewModel.item?.displayName ?? "Footwear")
         .background(Color(.systemGroupedBackground))
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.userId != nil {
                 Button("Log condition") {
@@ -64,46 +64,13 @@ struct FootwearDetailView: View {
                 }
             }
             .padding()
-        } else if let item = viewModel.item {
-            VStack(alignment: .leading, spacing: 18) {
-                softPanel {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text(item.displayName)
-                            .font(.title2)
-                            .bold()
-                        Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .foregroundColor(.secondary)
-                        Text(item.status.capitalized)
-                            .foregroundColor(.secondary)
+        } else if let item = viewModel.item, let lifecycle = item.lifecycleSummary {
+            VStack(alignment: .leading, spacing: 24) {
+                premiumHero(for: item, lifecycle: lifecycle)
 
-                        if item.isDefaultFallback {
-                            Text("This is your current default fallback footwear.")
-                                .foregroundColor(.green)
-                        }
-                    }
-                }
-
-                if let lifecycle = item.lifecycleSummary {
-                    softPanel {
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Lifecycle")
-                                .font(.headline)
-
-                            HStack(spacing: 24) {
-                                statBlock(label: "Steps", value: "\(lifecycle.totalSteps)")
-                                statBlock(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
-                            }
-
-                            Text(riskLabel(for: lifecycle.retirementRiskLevel))
-                                .foregroundColor(riskColor(for: lifecycle.retirementRiskLevel))
-
-                            if let confidenceScore = lifecycle.confidenceScore {
-                                Text(String(format: "Confidence in this estimate: %.2f", confidenceScore))
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    }
+                HStack(spacing: 14) {
+                    statCard(label: "Steps tracked", value: "\(lifecycle.totalSteps)")
+                    statCard(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -111,29 +78,57 @@ struct FootwearDetailView: View {
                         .font(.headline)
 
                     if !viewModel.hasConditionHistory {
-                        softPanel {
-                            Text("Condition check-ins will appear here once you start logging them.")
-                                .foregroundColor(.secondary)
-                        }
+                        Text("Condition check-ins will appear here once you start logging them.")
+                            .foregroundColor(.secondary)
+                            .softPanelStyle()
                     } else {
                         ForEach(viewModel.conditionLogs) { log in
-                            softPanel {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(log.loggedAt.formatted(date: .abbreviated, time: .shortened))
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    Text("Confidence: \(log.overallConfidenceScore)/5")
-                                    Text("Comfort: \(log.comfortScore)/5")
-                                        .foregroundColor(.secondary)
-                                    if let notes = log.notes, !notes.isEmpty {
-                                        Text(notes)
+                            VStack(alignment: .leading, spacing: 12) {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(log.loggedAt.formatted(date: .abbreviated, time: .shortened))
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                        Text("Confidence in continued use")
+                                            .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
+
+                                    Spacer()
+
+                                    Text("\(log.overallConfidenceScore)/5")
+                                        .font(.caption.weight(.semibold))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 7)
+                                        .background(Color.blue.opacity(0.12))
+                                        .foregroundColor(.blue)
+                                        .clipShape(Capsule())
+                                }
+
+                                HStack(spacing: 12) {
+                                    metricPill(label: "Comfort", value: "\(log.comfortScore)")
+                                    metricPill(label: "Support", value: "\(log.supportScore)")
+                                    metricPill(label: "Grip", value: "\(log.gripScore)")
+                                }
+
+                                if let notes = log.notes, !notes.isEmpty {
+                                    Text(notes)
+                                        .foregroundColor(.secondary)
                                 }
                             }
+                            .elevatedPanelStyle()
                         }
                     }
                 }
+            }
+            .padding()
+        } else if let item = viewModel.item {
+            VStack(alignment: .leading, spacing: 22) {
+                premiumHeroWithoutLifecycle(for: item)
+
+                Text("No lifecycle data has been built for this footwear yet.")
+                    .foregroundColor(.secondary)
+                    .softPanelStyle()
             }
             .padding()
         } else {
@@ -143,38 +138,112 @@ struct FootwearDetailView: View {
         }
     }
 
-    private func statBlock(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private func premiumHero(for item: FootwearItem, lifecycle: LifecycleSummaryLite) -> some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(item.displayName)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                        .foregroundColor(Color.white.opacity(0.72))
+                }
+
+                Spacer()
+
+                if item.isDefaultFallback {
+                    Text("Default")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.16))
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text(SoftUtilityRiskTone.longLabel(for: lifecycle.retirementRiskLevel))
+                    .font(.headline)
+                    .foregroundColor(.white)
+
+                if let confidenceScore = lifecycle.confidenceScore {
+                    Text(String(format: "Confidence in this estimate: %.2f", confidenceScore))
+                        .font(.subheadline)
+                        .foregroundColor(Color.white.opacity(0.72))
+                }
+            }
+
+            HStack(spacing: 10) {
+                chip(label: item.status.capitalized)
+                chip(label: SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+            }
+        }
+        .premiumHeroStyle()
+    }
+
+    private func premiumHeroWithoutLifecycle(for item: FootwearItem) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(item.displayName)
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                        .foregroundColor(Color.white.opacity(0.72))
+                }
+
+                Spacer()
+
+                if item.isDefaultFallback {
+                    Text("Default")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Color.white.opacity(0.16))
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
+                }
+            }
+
+            Text("This pair has been added, but its wear history hasn’t built up yet.")
+                .foregroundColor(Color.white.opacity(0.78))
+        }
+        .premiumHeroStyle()
+    }
+
+    private func statCard(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.title3)
-                .bold()
+                .font(.system(size: 22, weight: .bold, design: .rounded))
         }
+        .metricTileStyle()
     }
 
-    private func softPanel<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    private func metricPill(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.headline)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color(.tertiarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
-    private func riskLabel(for level: String) -> String {
-        switch level.lowercased() {
-        case "high": return "This footwear may need replacing soon."
-        case "medium": return "This footwear is worth keeping an eye on."
-        default: return "This footwear looks to be holding up well."
-        }
-    }
-
-    private func riskColor(for level: String) -> Color {
-        switch level.lowercased() {
-        case "high": return .red
-        case "medium": return .orange
-        default: return .green
-        }
+    private func chip(label: String) -> some View {
+        Text(label)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.12))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
     }
 }
