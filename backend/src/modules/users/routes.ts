@@ -21,11 +21,14 @@ export async function userRoutes(app: FastifyInstance) {
   app.post('/dev/bootstrap-demo-user', async () => {
     const user = await prisma.user.upsert({
       where: { authProviderId: 'demo-user' },
-      update: {},
+      update: {
+        onboardingStatus: 'onboarding_incomplete',
+        healthConnectionStatus: 'not_connected',
+      },
       create: {
         authProviderId: 'demo-user',
-        onboardingStatus: 'onboarding_complete',
-        healthConnectionStatus: 'connected',
+        onboardingStatus: 'onboarding_incomplete',
+        healthConnectionStatus: 'not_connected',
         timezone: 'Europe/London',
         locale: 'en-GB',
       },

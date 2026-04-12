@@ -37,8 +37,11 @@ That path is useful later for cleaner packaging/runtime validation once the data
 The prototype currently uses:
 - `demo-user`
 
-Seed command creates that user.
-You can also bootstrap it via:
+Bootstrap route creates the demo user with a more honest first-run state:
+- `onboardingStatus: onboarding_incomplete`
+- `healthConnectionStatus: not_connected`
+
+You can bootstrap it via:
 ```bash
 curl -X POST http://localhost:3000/dev/bootstrap-demo-user
 ```
@@ -47,6 +50,7 @@ curl -X POST http://localhost:3000/dev/bootstrap-demo-user
 ```bash
 curl http://localhost:3000/health
 curl http://localhost:3000/
+curl -X POST http://localhost:3000/dev/bootstrap-demo-user
 curl "http://localhost:3000/me?authProviderId=demo-user"
 ```
 
@@ -110,4 +114,5 @@ Prototype backend supports:
 - Prisma client generation works
 - validation errors are surfaced more cleanly
 - root endpoint reflects connected-prototype state
+- demo bootstrap no longer pretends onboarding is already complete
 - full smoke pass is still blocked here by missing PostgreSQL runtime
