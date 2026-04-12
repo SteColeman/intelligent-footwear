@@ -6,63 +6,86 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 24) {
                     if let userId = session.userId {
                         if viewModel.isLoading {
                             ProgressView()
                                 .frame(maxWidth: .infinity, alignment: .center)
-                                .padding(.top, 40)
+                                .padding(.top, 50)
                         } else if let summary = viewModel.summary {
                             homeHero(summary: summary)
 
-                            activityPanel(summary: summary)
+                            VStack(alignment: .leading, spacing: 14) {
+                                Text("Today’s movement")
+                                    .font(.title3)
+                                    .bold()
+
+                                HStack(spacing: 14) {
+                                    statBlock(label: "Steps", value: "\(summary.today.steps)", caption: summary.today.steps > 0 ? "moving through the day" : "nothing tracked yet")
+                                    statBlock(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm), caption: summary.today.distanceKm > 0 ? "covered so far" : "no distance yet")
+                                }
+                            }
 
                             if let currentDefault = summary.currentDefault {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Text("Default footwear")
-                                        .font(.headline)
-                                    Text(currentDefault.displayName)
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Current default")
                                         .font(.title3)
-                                    Text("Used as the fallback when you want wear to land somewhere predictable.")
-                                        .foregroundColor(.secondary)
-                                }
-                                .elevatedPanelStyle()
-                            }
+                                        .bold()
 
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Needs review")
-                                    .font(.headline)
-
-                                if summary.unassignedWear.count > 0 {
-                                    Text("\(summary.unassignedWear.count) wear event\(summary.unassignedWear.count == 1 ? "" : "s") still need assigning.")
-                                    Text(String(format: "That currently represents %.1f km of unassigned movement.", summary.unassignedWear.distanceKm))
-                                        .foregroundColor(.secondary)
-                                } else {
-                                    Text("Everything imported so far has been assigned.")
-                                    Text("Your daily view is up to date.")
-                                        .foregroundColor(.secondary)
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(currentDefault.displayName)
+                                            .font(.headline)
+                                        Text("Used as the fallback when you want wear to land somewhere predictable.")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .elevatedPanelStyle()
                                 }
                             }
-                            .softPanelStyle()
+
+                            HStack(alignment: .top, spacing: 14) {
+                                reviewCard(count: summary.unassignedWear.count, distanceKm: summary.unassignedWear.distanceKm)
+
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Rotation")
+                                        .font(.headline)
+                                    Text("\(summary.activeFootwear.count)")
+                                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                                    Text("pairs currently active")
+                                        .foregroundColor(.secondary)
+                                }
+                                .metricTileStyle()
+                            }
 
                             if !summary.activeFootwear.isEmpty {
-                                VStack(alignment: .leading, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 14) {
                                     Text("In rotation")
-                                        .font(.headline)
+                                        .font(.title3)
+                                        .bold()
 
                                     ForEach(summary.activeFootwear) { item in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text(item.displayName)
-                                                .font(.headline)
-                                            Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
-                                                .foregroundColor(.secondary)
+                                        HStack(alignment: .top, spacing: 14) {
+                                            Circle()
+                                                .fill(Color(.tertiarySystemGroupedBackground))
+                                                .frame(width: 44, height: 44)
+                                                .overlay(
+                                                    Image(systemName: "shoeprints.fill")
+                                                        .foregroundColor(.secondary)
+                                                )
 
-                                            if let lifecycle = item.lifecycleSummary {
-                                                Text("\(lifecycle.totalSteps) steps tracked")
-                                                Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
-                                                    .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
+                                            VStack(alignment: .leading, spacing: 6) {
+                                                Text(item.displayName)
+                                                    .font(.headline)
+                                                Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                                    .foregroundColor(.secondary)
+
+                                                if let lifecycle = item.lifecycleSummary {
+                                                    Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+                                                        .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
+                                                }
                                             }
+
+                                            Spacer()
                                         }
                                         .softPanelStyle()
                                     }
@@ -108,7 +131,13 @@ struct HomeView: View {
                 .padding()
             }
             .navigationTitle("Home")
-            .background(Color(.systemGroupedBackground))
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .task(id: session.userId) {
                 if let userId = session.userId {
                     await viewModel.load(userId: userId)
@@ -118,12 +147,12 @@ struct HomeView: View {
     }
 
     private func homeHero(summary: HomeSummary) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Today")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .font(.system(size: 36, weight: .bold, design: .rounded))
                 .foregroundColor(.white)
-            Text("A calm view of movement, footwear in rotation, and anything that still needs your attention.")
-                .foregroundColor(Color.white.opacity(0.74))
+            Text("A calmer read on movement, footwear in rotation, and anything that still needs your attention.")
+                .foregroundColor(Color.white.opacity(0.76))
 
             HStack(spacing: 10) {
                 heroChip(label: "\(summary.activeFootwear.count) active")
@@ -133,20 +162,28 @@ struct HomeView: View {
         .premiumHeroStyle()
     }
 
-    private func activityPanel(summary: HomeSummary) -> some View {
-        HStack(spacing: 14) {
-            statBlock(label: "Steps", value: "\(summary.today.steps)")
-            statBlock(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm))
+    private func reviewCard(count: Int, distanceKm: Double) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Needs review")
+                .font(.headline)
+            Text("\(count)")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+            Text(count == 0 ? "everything assigned" : String(format: "%.1f km still unassigned", distanceKm))
+                .foregroundColor(.secondary)
         }
+        .metricTileStyle()
     }
 
-    private func statBlock(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func statBlock(label: String, value: String, caption: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+            Text(caption)
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .metricTileStyle()
     }

@@ -6,7 +6,7 @@ struct AssignView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 if let userId = session.userId {
                     content(userId: userId)
                 } else {
@@ -15,7 +15,13 @@ struct AssignView: View {
                         .padding(.top, 30)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
             .navigationTitle("Assign")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -27,37 +33,10 @@ struct AssignView: View {
 
     @ViewBuilder
     private func content(userId: String) -> some View {
-        VStack(alignment: .leading, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Assign wear")
-                    .font(.largeTitle)
-                    .bold()
-                Text("A quiet review queue for movement that still needs a home.")
-                    .foregroundColor(.secondary)
-            }
+        VStack(alignment: .leading, spacing: 22) {
+            assignHero
 
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Import activity")
-                    .font(.headline)
-
-                Text("Start with demo data for testing, or bring in today’s Health data when you want the real path.")
-                    .foregroundColor(.secondary)
-
-                HStack {
-                    Button("Import today’s health data") {
-                        Task {
-                            await viewModel.importTodayHealthData(userId: userId)
-                        }
-                    }
-
-                    Button("Import demo data") {
-                        Task {
-                            await viewModel.importDemoHealthData(userId: userId)
-                        }
-                    }
-                }
-            }
-            .softPanelStyle()
+            importPanel(userId: userId)
 
             if viewModel.isLoading {
                 ProgressView()
@@ -72,50 +51,13 @@ struct AssignView: View {
                 }
                 .softPanelStyle()
             } else if !viewModel.unassignedWear.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Needs review")
-                        .font(.headline)
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Waiting for a home")
+                        .font(.title3)
+                        .bold()
 
                     ForEach(viewModel.unassignedWear) { event in
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(event.eventType.replacingOccurrences(of: "_", with: " ").capitalized)
-                                .font(.headline)
-
-                            HStack(spacing: 20) {
-                                statLine(label: "Steps", value: "\(event.stepsCount ?? 0)")
-                                statLine(label: "Distance", value: String(format: "%.1f km", event.distanceKm ?? 0))
-                            }
-
-                            if viewModel.hasLoadedAssignableFootwear {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Assign to")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-
-                                    ForEach(viewModel.footwearItems) { item in
-                                        Button {
-                                            Task {
-                                                await viewModel.assign(userId: userId, wearEventId: event.id, footwearItemId: item.id)
-                                            }
-                                        } label: {
-                                            HStack {
-                                                Text(item.displayName)
-                                                Spacer()
-                                                if item.isDefaultFallback {
-                                                    Text("Default")
-                                                        .font(.caption)
-                                                        .foregroundColor(.green)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                Text("Add footwear before assigning wear.")
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .softPanelStyle()
+                        assignmentCard(event: event, userId: userId)
                     }
                 }
             } else {
@@ -131,13 +73,130 @@ struct AssignView: View {
         .padding()
     }
 
-    private func statLine(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+    private var assignHero: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Assign wear")
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            Text("A review queue for movement that still needs to be matched to real footwear.")
+                .foregroundColor(Color.white.opacity(0.76))
+            heroChip(label: viewModel.unassignedWear.isEmpty ? "All clear" : "\(viewModel.unassignedWear.count) to review")
+        }
+        .premiumHeroStyle()
+    }
+
+    private func importPanel(userId: String) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Import activity")
+                .font(.headline)
+
+            Text("Bring in demo data to test the loop quickly, or use today’s Health data when you want the real path.")
+                .foregroundColor(.secondary)
+
+            HStack {
+                Button("Import today’s health data") {
+                    Task {
+                        await viewModel.importTodayHealthData(userId: userId)
+                    }
+                }
+
+                Button("Import demo data") {
+                    Task {
+                        await viewModel.importDemoHealthData(userId: userId)
+                    }
+                }
+            }
+        }
+        .elevatedPanelStyle()
+    }
+
+    private func assignmentCard(event: WearEvent, userId: String) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(event.eventType.replacingOccurrences(of: "_", with: " ").capitalized)
+                        .font(.headline)
+                    Text("Review and place this movement where it belongs.")
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.triangle.branch")
+                    .foregroundColor(.secondary)
+            }
+
+            HStack(spacing: 14) {
+                metricTile(label: "Steps", value: "\(event.stepsCount ?? 0)")
+                metricTile(label: "Distance", value: String(format: "%.1f km", event.distanceKm ?? 0))
+            }
+
+            if viewModel.hasLoadedAssignableFootwear {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Assign to")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(.secondary)
+
+                    ForEach(viewModel.footwearItems) { item in
+                        Button {
+                            Task {
+                                await viewModel.assign(userId: userId, wearEventId: event.id, footwearItemId: item.id)
+                            }
+                        } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(item.displayName)
+                                        .foregroundColor(.primary)
+                                    Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+
+                                Spacer()
+
+                                if item.isDefaultFallback {
+                                    Text("Default")
+                                        .font(.caption.weight(.semibold))
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Color.green.opacity(0.12))
+                                        .foregroundColor(.green)
+                                        .clipShape(Capsule())
+                                }
+                            }
+                            .padding(14)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.tertiarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                    }
+                }
+            } else {
+                Text("Add footwear before assigning wear.")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .elevatedPanelStyle()
+    }
+
+    private func metricTile(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
             Text(value)
-                .font(.subheadline.weight(.medium))
+                .font(.system(size: 24, weight: .bold, design: .rounded))
         }
+        .metricTileStyle()
+    }
+
+    private func heroChip(label: String) -> some View {
+        Text(label)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.12))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
     }
 }
