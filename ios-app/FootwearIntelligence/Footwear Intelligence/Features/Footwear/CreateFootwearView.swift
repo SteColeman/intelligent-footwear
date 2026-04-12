@@ -9,7 +9,12 @@ struct CreateFootwearView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 22) {
-                    createHero
+                    SoftUtilityHero(
+                        title: "Add footwear",
+                        subtitle: "Start with the pair you wear most often so the app can build a useful history around it.",
+                        eyebrow: "Start with your real default",
+                        titleSize: 32
+                    )
 
                     VStack(alignment: .leading, spacing: 14) {
                         Text("Footwear details")
@@ -41,13 +46,7 @@ struct CreateFootwearView: View {
                 }
                 .padding()
             }
-            .background(
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .softUtilityBackground()
             .navigationTitle("Add Footwear")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -72,23 +71,5 @@ struct CreateFootwearView: View {
                 }
             }
         }
-    }
-
-    private var createHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Add footwear")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("Start with the pair you wear most often so the app can build a useful history around it.")
-                .foregroundColor(Color.white.opacity(0.76))
-            Text("Start with your real default")
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-                .background(Color.white.opacity(0.12))
-                .foregroundColor(.white)
-                .clipShape(Capsule())
-        }
-        .premiumHeroStyle()
     }
 }

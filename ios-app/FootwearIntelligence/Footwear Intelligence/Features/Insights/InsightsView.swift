@@ -14,7 +14,18 @@ struct InsightsView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 40)
                         } else if let summary = viewModel.summary {
-                            insightsHero(summary: summary)
+                            VStack(alignment: .leading, spacing: 16) {
+                                SoftUtilityHero(
+                                    title: "Insights",
+                                    subtitle: "A softer read on what’s getting worn most, what’s beginning to drift, and what may need attention soon.",
+                                    titleSize: 34
+                                )
+
+                                HStack(spacing: 10) {
+                                    SoftUtilityHeroChip(label: "\(summary.mostWorn.count) most worn")
+                                    SoftUtilityHeroChip(label: "\(summary.nearRetirement.count) near retirement")
+                                }
+                            }
 
                             HStack(spacing: 14) {
                                 headlineMetric(label: "Most worn", value: "\(summary.mostWorn.count)", caption: "pairs with strongest wear history")
@@ -102,13 +113,7 @@ struct InsightsView: View {
                 }
                 .padding()
             }
-            .background(
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .softUtilityBackground()
             .navigationTitle("Insights")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -118,34 +123,8 @@ struct InsightsView: View {
         }
     }
 
-    private func insightsHero(summary: InsightsSummary) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Insights")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("A softer read on what’s getting worn most, what’s beginning to drift, and what may need attention soon.")
-                .foregroundColor(Color.white.opacity(0.76))
-
-            HStack(spacing: 10) {
-                heroChip(label: "\(summary.mostWorn.count) most worn")
-                heroChip(label: "\(summary.nearRetirement.count) near retirement")
-            }
-        }
-        .premiumHeroStyle()
-    }
-
     private func headlineMetric(label: String, value: String, caption: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(label)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            Text(value)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-            Text(caption)
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .metricTileStyle()
+        SoftUtilityMetricTile(label: label, value: value, caption: caption)
     }
 
     private func emptyPanel(text: String) -> some View {
@@ -182,15 +161,5 @@ struct InsightsView: View {
             Spacer()
         }
         .elevatedPanelStyle()
-    }
-
-    private func heroChip(label: String) -> some View {
-        Text(label)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(Color.white.opacity(0.12))
-            .foregroundColor(.white)
-            .clipShape(Capsule())
     }
 }

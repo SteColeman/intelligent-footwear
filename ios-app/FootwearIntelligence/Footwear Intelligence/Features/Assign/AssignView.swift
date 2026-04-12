@@ -15,13 +15,7 @@ struct AssignView: View {
                         .padding(.top, 30)
                 }
             }
-            .background(
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .softUtilityBackground()
             .navigationTitle("Assign")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -34,7 +28,15 @@ struct AssignView: View {
     @ViewBuilder
     private func content(userId: String) -> some View {
         VStack(alignment: .leading, spacing: 22) {
-            assignHero
+            VStack(alignment: .leading, spacing: 16) {
+                SoftUtilityHero(
+                    title: "Assign wear",
+                    subtitle: "A review queue for movement that still needs to be matched to real footwear.",
+                    titleSize: 34
+                )
+
+                SoftUtilityHeroChip(label: viewModel.unassignedWear.isEmpty ? "All clear" : "\(viewModel.unassignedWear.count) to review")
+            }
 
             importPanel(userId: userId)
 
@@ -71,18 +73,6 @@ struct AssignView: View {
             }
         }
         .padding()
-    }
-
-    private var assignHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Assign wear")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("A review queue for movement that still needs to be matched to real footwear.")
-                .foregroundColor(Color.white.opacity(0.76))
-            heroChip(label: viewModel.unassignedWear.isEmpty ? "All clear" : "\(viewModel.unassignedWear.count) to review")
-        }
-        .premiumHeroStyle()
     }
 
     private func importPanel(userId: String) -> some View {
@@ -188,15 +178,5 @@ struct AssignView: View {
                 .font(.system(size: 24, weight: .bold, design: .rounded))
         }
         .metricTileStyle()
-    }
-
-    private func heroChip(label: String) -> some View {
-        Text(label)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(Color.white.opacity(0.12))
-            .foregroundColor(.white)
-            .clipShape(Capsule())
     }
 }

@@ -14,7 +14,18 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 50)
                         } else if let summary = viewModel.summary {
-                            homeHero(summary: summary)
+                            VStack(alignment: .leading, spacing: 16) {
+                                SoftUtilityHero(
+                                    title: "Today",
+                                    subtitle: "A calmer read on movement, footwear in rotation, and anything that still needs your attention.",
+                                    titleSize: 36
+                                )
+
+                                HStack(spacing: 10) {
+                                    SoftUtilityHeroChip(label: "\(summary.activeFootwear.count) active")
+                                    SoftUtilityHeroChip(label: "\(summary.unassignedWear.count) to review")
+                                }
+                            }
 
                             VStack(alignment: .leading, spacing: 14) {
                                 Text("Today’s movement")
@@ -22,8 +33,8 @@ struct HomeView: View {
                                     .bold()
 
                                 HStack(spacing: 14) {
-                                    statBlock(label: "Steps", value: "\(summary.today.steps)", caption: summary.today.steps > 0 ? "moving through the day" : "nothing tracked yet")
-                                    statBlock(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm), caption: summary.today.distanceKm > 0 ? "covered so far" : "no distance yet")
+                                    SoftUtilityMetricTile(label: "Steps", value: "\(summary.today.steps)", caption: summary.today.steps > 0 ? "moving through the day" : "nothing tracked yet")
+                                    SoftUtilityMetricTile(label: "Distance", value: String(format: "%.1f km", summary.today.distanceKm), caption: summary.today.distanceKm > 0 ? "covered so far" : "no distance yet")
                                 }
                             }
 
@@ -131,13 +142,7 @@ struct HomeView: View {
                 .padding()
             }
             .navigationTitle("Home")
-            .background(
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .softUtilityBackground()
             .task(id: session.userId) {
                 if let userId = session.userId {
                     await viewModel.load(userId: userId)
@@ -146,55 +151,11 @@ struct HomeView: View {
         }
     }
 
-    private func homeHero(summary: HomeSummary) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Today")
-                .font(.system(size: 36, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("A calmer read on movement, footwear in rotation, and anything that still needs your attention.")
-                .foregroundColor(Color.white.opacity(0.76))
-
-            HStack(spacing: 10) {
-                heroChip(label: "\(summary.activeFootwear.count) active")
-                heroChip(label: "\(summary.unassignedWear.count) to review")
-            }
-        }
-        .premiumHeroStyle()
-    }
-
     private func reviewCard(count: Int, distanceKm: Double) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Needs review")
-                .font(.headline)
-            Text("\(count)")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-            Text(count == 0 ? "everything assigned" : String(format: "%.1f km still unassigned", distanceKm))
-                .foregroundColor(.secondary)
-        }
-        .metricTileStyle()
-    }
-
-    private func statBlock(label: String, value: String, caption: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(label)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            Text(value)
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-            Text(caption)
-                .font(.caption)
-                .foregroundColor(.secondary)
-        }
-        .metricTileStyle()
-    }
-
-    private func heroChip(label: String) -> some View {
-        Text(label)
-            .font(.caption.weight(.semibold))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(Color.white.opacity(0.12))
-            .foregroundColor(.white)
-            .clipShape(Capsule())
+        SoftUtilityMetricTile(
+            label: "Needs review",
+            value: "\(count)",
+            caption: count == 0 ? "everything assigned" : String(format: "%.1f km still unassigned", distanceKm)
+        )
     }
 }

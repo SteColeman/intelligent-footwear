@@ -75,6 +75,101 @@ struct MetricTileModifier: ViewModifier {
     }
 }
 
+struct SoftUtilityBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(
+                LinearGradient(
+                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+    }
+}
+
+struct SoftUtilityHero: View {
+    let title: String
+    let subtitle: String
+    let eyebrow: String?
+    let titleSize: CGFloat
+
+    init(title: String, subtitle: String, eyebrow: String? = nil, titleSize: CGFloat = 34) {
+        self.title = title
+        self.subtitle = subtitle
+        self.eyebrow = eyebrow
+        self.titleSize = titleSize
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(title)
+                .font(.system(size: titleSize, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+            Text(subtitle)
+                .foregroundColor(Color.white.opacity(0.76))
+
+            if let eyebrow {
+                SoftUtilityHeroChip(label: eyebrow)
+            }
+        }
+        .premiumHeroStyle()
+    }
+}
+
+struct SoftUtilityHeroChip: View {
+    let label: String
+
+    var body: some View {
+        Text(label)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 7)
+            .background(Color.white.opacity(0.12))
+            .foregroundColor(.white)
+            .clipShape(Capsule())
+    }
+}
+
+struct SoftUtilityBulletRow: View {
+    let text: String
+    var systemImage: String = "checkmark.circle.fill"
+    var tint: Color = .green
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: systemImage)
+                .foregroundColor(tint)
+            Text(text)
+                .foregroundColor(.primary)
+            Spacer()
+        }
+    }
+}
+
+struct SoftUtilityMetricTile: View {
+    let label: String
+    let value: String
+    let caption: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+            if let caption {
+                Text(caption)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .metricTileStyle()
+    }
+}
+
 extension View {
     func softPanelStyle() -> some View {
         modifier(SoftPanelModifier())
@@ -90,6 +185,10 @@ extension View {
 
     func metricTileStyle() -> some View {
         modifier(MetricTileModifier())
+    }
+
+    func softUtilityBackground() -> some View {
+        modifier(SoftUtilityBackground())
     }
 }
 

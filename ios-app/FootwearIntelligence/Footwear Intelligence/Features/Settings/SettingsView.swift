@@ -8,7 +8,12 @@ struct SettingsView: View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 22) {
-                    settingsHero
+                    SoftUtilityHero(
+                        title: "Settings",
+                        subtitle: "Quiet status, connection, and build details for the current app state.",
+                        eyebrow: "Connected prototype",
+                        titleSize: 32
+                    )
 
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Apple Health")
@@ -65,32 +70,8 @@ struct SettingsView: View {
                 }
                 .padding()
             }
-            .background(
-                LinearGradient(
-                    colors: [Color(.systemGroupedBackground), Color(.secondarySystemGroupedBackground)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+            .softUtilityBackground()
             .navigationTitle("Settings")
         }
-    }
-
-    private var settingsHero: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Settings")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text("Quiet status, connection, and build details for the current app state.")
-                .foregroundColor(Color.white.opacity(0.76))
-            Text("Connected prototype")
-                .font(.caption.weight(.semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-                .background(Color.white.opacity(0.12))
-                .foregroundColor(.white)
-                .clipShape(Capsule())
-        }
-        .premiumHeroStyle()
     }
 }
