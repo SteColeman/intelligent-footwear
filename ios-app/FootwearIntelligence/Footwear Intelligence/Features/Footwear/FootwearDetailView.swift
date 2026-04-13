@@ -580,7 +580,7 @@ struct FootwearDetailView: View {
 
         do {
             if let data = try await item.loadTransferable(type: Data.self) {
-                let fileURL = try persistSelectedPhoto(data: data)
+                let fileURL = try FootwearPhotoStore.persistImageData(data)
                 _ = try await APIClient.shared.updateFootwearPhoto(
                     userId: userId,
                     footwearItemId: footwearItemId,
@@ -611,18 +611,5 @@ struct FootwearDetailView: View {
         }
 
         isUpdatingPhoto = false
-    }
-
-    private func persistSelectedPhoto(data: Data) throws -> URL {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let directory = base.appendingPathComponent("FootwearPhotos", isDirectory: true)
-
-        if !FileManager.default.fileExists(atPath: directory.path) {
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        }
-
-        let fileURL = directory.appendingPathComponent("\(UUID().uuidString).jpg")
-        try data.write(to: fileURL, options: .atomic)
-        return fileURL
     }
 }

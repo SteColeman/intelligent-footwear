@@ -23,9 +23,7 @@ final class CreateFootwearViewModel: ObservableObject {
     ]
 
     func setLocalPhoto(data: Data) throws {
-        let directory = try ensurePhotoDirectory()
-        let fileURL = directory.appendingPathComponent("\(UUID().uuidString).jpg")
-        try data.write(to: fileURL, options: .atomic)
+        let fileURL = try FootwearPhotoStore.persistImageData(data)
         photoUrl = fileURL.absoluteString
     }
 
@@ -68,16 +66,5 @@ final class CreateFootwearViewModel: ObservableObject {
         }
 
         isSaving = false
-    }
-
-    private func ensurePhotoDirectory() throws -> URL {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        let directory = base.appendingPathComponent("FootwearPhotos", isDirectory: true)
-
-        if !FileManager.default.fileExists(atPath: directory.path) {
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        }
-
-        return directory
     }
 }
