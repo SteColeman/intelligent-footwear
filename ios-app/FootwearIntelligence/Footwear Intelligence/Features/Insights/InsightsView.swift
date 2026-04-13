@@ -7,35 +7,35 @@ struct InsightsView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 22) {
+                VStack(alignment: .leading, spacing: 26) {
                     if let userId = session.userId {
                         if viewModel.isLoading {
                             ProgressView()
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 40)
                         } else if let summary = viewModel.summary {
-                            VStack(alignment: .leading, spacing: 16) {
-                                SoftUtilityHero(
-                                    title: "Insights",
-                                    subtitle: "A softer read on what’s getting worn most, what’s beginning to drift, and what may need attention soon.",
-                                    titleSize: 34
-                                )
-
-                                HStack(spacing: 10) {
-                                    SoftUtilityHeroChip(label: "\(summary.mostWorn.count) most worn")
-                                    SoftUtilityHeroChip(label: "\(summary.nearRetirement.count) near retirement")
-                                }
-                            }
+                            insightsHero(summary: summary)
 
                             HStack(spacing: 14) {
-                                headlineMetric(label: "Most worn", value: "\(summary.mostWorn.count)", caption: "pairs with strongest wear history")
-                                headlineMetric(label: "Watch list", value: "\(summary.needsAttention.count)", caption: "pairs worth checking soon")
+                                headlineMetric(
+                                    label: "Most worn",
+                                    value: "\(summary.mostWorn.count)",
+                                    caption: "pairs with strongest wear history",
+                                    tint: Color(red: 0.87, green: 0.90, blue: 0.82)
+                                )
+                                headlineMetric(
+                                    label: "Watch list",
+                                    value: "\(summary.needsAttention.count)",
+                                    caption: "pairs worth checking soon",
+                                    tint: Color(red: 0.93, green: 0.87, blue: 0.78)
+                                )
                             }
 
-                            VStack(alignment: .leading, spacing: 14) {
-                                Text("Most worn")
-                                    .font(.title3)
-                                    .bold()
+                            VStack(alignment: .leading, spacing: 16) {
+                                WarmSectionHeader(
+                                    title: "Most worn",
+                                    detail: "The pairs building the strongest real-life wear history."
+                                )
 
                                 if summary.mostWorn.isEmpty {
                                     emptyPanel(text: "Wear ranking will appear once more activity has been assigned.")
@@ -51,10 +51,11 @@ struct InsightsView: View {
                                 }
                             }
 
-                            VStack(alignment: .leading, spacing: 14) {
-                                Text("Needs attention")
-                                    .font(.title3)
-                                    .bold()
+                            VStack(alignment: .leading, spacing: 16) {
+                                WarmSectionHeader(
+                                    title: "Needs attention",
+                                    detail: "Pairs showing signs that they may need a closer look soon."
+                                )
 
                                 if summary.needsAttention.isEmpty {
                                     emptyPanel(text: "Nothing is standing out as concerning right now.")
@@ -70,10 +71,11 @@ struct InsightsView: View {
                                 }
                             }
 
-                            VStack(alignment: .leading, spacing: 14) {
-                                Text("Near retirement")
-                                    .font(.title3)
-                                    .bold()
+                            VStack(alignment: .leading, spacing: 16) {
+                                WarmSectionHeader(
+                                    title: "Near retirement",
+                                    detail: "Pairs that may be approaching the end of their useful life."
+                                )
 
                                 if summary.nearRetirement.isEmpty {
                                     emptyPanel(text: "Nothing looks close to retirement right now.")
@@ -111,9 +113,10 @@ struct InsightsView: View {
                             .padding(.top, 30)
                     }
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 16)
             }
-            .softUtilityBackground()
+            .warmAppBackground()
             .navigationTitle("Insights")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -123,8 +126,24 @@ struct InsightsView: View {
         }
     }
 
-    private func headlineMetric(label: String, value: String, caption: String) -> some View {
-        SoftUtilityMetricTile(label: label, value: value, caption: caption)
+    private func insightsHero(summary: InsightsSummary) -> some View {
+        WarmHeroCard {
+            Text("Insights")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+            Text("A calmer read on what’s getting worn most, what may be drifting, and what may need attention soon.")
+                .foregroundColor(Color.white.opacity(0.76))
+
+            HStack(spacing: 12) {
+                WarmHeroStat(value: "\(summary.mostWorn.count)", label: "most worn")
+                WarmHeroStat(value: "\(summary.nearRetirement.count)", label: "near retirement")
+            }
+        }
+    }
+
+    private func headlineMetric(label: String, value: String, caption: String, tint: Color) -> some View {
+        WarmMetricTile(label: label, value: value, caption: caption, tint: tint)
     }
 
     private func emptyPanel(text: String) -> some View {
@@ -134,32 +153,23 @@ struct InsightsView: View {
     }
 
     private func insightRow(title: String, subtitle: String, tone: Color, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Circle()
-                .fill(tone.opacity(0.14))
-                .frame(width: 46, height: 46)
-                .overlay(
-                    Circle()
-                        .stroke(tone.opacity(0.24), lineWidth: 1)
-                )
-                .overlay(
-                    Image(systemName: "waveform.path.ecg")
+        WarmSurfaceCard {
+            HStack(alignment: .top, spacing: 14) {
+                WarmIconTile(systemName: "waveform.path.ecg", tint: tone.opacity(0.18))
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(title)
+                        .font(.headline)
+                    Text(subtitle)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Text(detail)
+                        .font(.subheadline.weight(.medium))
                         .foregroundColor(tone)
-                )
+                }
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(detail)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(tone)
+                Spacer()
             }
-
-            Spacer()
         }
-        .elevatedPanelStyle()
     }
 }

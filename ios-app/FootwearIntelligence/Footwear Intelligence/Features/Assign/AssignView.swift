@@ -15,7 +15,7 @@ struct AssignView: View {
                         .padding(.top, 30)
                 }
             }
-            .softUtilityBackground()
+            .warmAppBackground()
             .navigationTitle("Assign")
             .task(id: session.userId) {
                 if let userId = session.userId {
@@ -27,16 +27,8 @@ struct AssignView: View {
 
     @ViewBuilder
     private func content(userId: String) -> some View {
-        VStack(alignment: .leading, spacing: 22) {
-            VStack(alignment: .leading, spacing: 16) {
-                SoftUtilityHero(
-                    title: "Assign wear",
-                    subtitle: "A review queue for movement that still needs to be matched to real footwear.",
-                    titleSize: 34
-                )
-
-                SoftUtilityHeroChip(label: viewModel.unassignedWear.isEmpty ? "All clear" : "\(viewModel.unassignedWear.count) to review")
-            }
+        VStack(alignment: .leading, spacing: 26) {
+            assignHero
 
             importPanel(userId: userId)
 
@@ -53,10 +45,11 @@ struct AssignView: View {
                 }
                 .softPanelStyle()
             } else if !viewModel.unassignedWear.isEmpty {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Waiting for a home")
-                        .font(.title3)
-                        .bold()
+                VStack(alignment: .leading, spacing: 16) {
+                    WarmSectionHeader(
+                        title: "Waiting for a home",
+                        detail: "Imported movement that still needs to be matched to real footwear."
+                    )
 
                     ForEach(viewModel.unassignedWear) { event in
                         assignmentCard(event: event, userId: userId)
@@ -72,11 +65,28 @@ struct AssignView: View {
                 .softPanelStyle()
             }
         }
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+    }
+
+    private var assignHero: some View {
+        WarmHeroCard {
+            Text("Assign wear")
+                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+
+            Text("A review queue for movement that still needs to be matched to real footwear.")
+                .foregroundColor(Color.white.opacity(0.76))
+
+            HStack(spacing: 12) {
+                WarmHeroStat(value: "\(viewModel.unassignedWear.count)", label: "to review")
+                WarmHeroStat(value: viewModel.hasLoadedAssignableFootwear ? "ready" : "waiting", label: "footwear")
+            }
+        }
     }
 
     private func importPanel(userId: String) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        WarmSurfaceCard {
             Text("Import activity")
                 .font(.headline)
 
@@ -97,11 +107,10 @@ struct AssignView: View {
                 }
             }
         }
-        .elevatedPanelStyle()
     }
 
     private func assignmentCard(event: WearEvent, userId: String) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        WarmSurfaceCard {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(event.eventType.replacingOccurrences(of: "_", with: " ").capitalized)
@@ -112,17 +121,16 @@ struct AssignView: View {
 
                 Spacer()
 
-                Image(systemName: "arrow.triangle.branch")
-                    .foregroundColor(.secondary)
+                WarmIconTile(systemName: "arrow.triangle.branch", tint: Color(red: 0.87, green: 0.90, blue: 0.82), size: 42)
             }
 
             HStack(spacing: 14) {
-                metricTile(label: "Steps", value: "\(event.stepsCount ?? 0)")
-                metricTile(label: "Distance", value: String(format: "%.1f km", event.distanceKm ?? 0))
+                metricTile(label: "Steps", value: "\(event.stepsCount ?? 0)", tint: Color(red: 0.87, green: 0.90, blue: 0.82))
+                metricTile(label: "Distance", value: String(format: "%.1f km", event.distanceKm ?? 0), tint: Color(red: 0.93, green: 0.87, blue: 0.78))
             }
 
             if viewModel.hasLoadedAssignableFootwear {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text("Assign to")
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
@@ -133,7 +141,9 @@ struct AssignView: View {
                                 await viewModel.assign(userId: userId, wearEventId: event.id, footwearItemId: item.id)
                             }
                         } label: {
-                            HStack {
+                            HStack(spacing: 12) {
+                                WarmIconTile(systemName: "shoeprints.fill", tint: Color(red: 0.92, green: 0.90, blue: 0.84), size: 46)
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(item.displayName)
                                         .foregroundColor(.primary)
@@ -156,8 +166,8 @@ struct AssignView: View {
                             }
                             .padding(14)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.tertiarySystemGroupedBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .background(Color.white.opacity(0.58))
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         }
                     }
                 }
@@ -166,10 +176,9 @@ struct AssignView: View {
                     .foregroundColor(.secondary)
             }
         }
-        .elevatedPanelStyle()
     }
 
-    private func metricTile(label: String, value: String) -> some View {
+    private func metricTile(label: String, value: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(.caption)
@@ -177,6 +186,9 @@ struct AssignView: View {
             Text(value)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
         }
-        .metricTileStyle()
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tint.opacity(0.92))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
