@@ -46,7 +46,7 @@ struct CreateFootwearView: View {
                         Text("Photo")
                             .font(.headline)
 
-                        Text("Choose a real image for this pair. For the current prototype, it will be stored locally on the device and used as the primary photo.")
+                        Text("Choose a real image for this pair. The current prototype stores it locally on the device and uses it as the primary photo.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
 
@@ -57,6 +57,20 @@ struct CreateFootwearView: View {
                                 .frame(height: 180)
                                 .frame(maxWidth: .infinity)
                                 .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        } else {
+                            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                                .fill(Color(.tertiarySystemGroupedBackground))
+                                .frame(height: 180)
+                                .overlay(
+                                    VStack(spacing: 10) {
+                                        Image(systemName: "photo")
+                                            .font(.title2)
+                                            .foregroundColor(.secondary)
+                                        Text("No photo selected yet")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                )
                         }
 
                         PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
@@ -75,11 +89,6 @@ struct CreateFootwearView: View {
                             }
                             .foregroundColor(.red)
                         }
-
-                        TextField("Optional image URL override", text: $viewModel.photoUrl)
-                            .textFieldStyle(.roundedBorder)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.URL)
                     }
                     .softPanelStyle()
 
