@@ -59,7 +59,7 @@ struct HomeView: View {
                 .padding(.vertical, 16)
             }
             .navigationTitle("Home")
-            .background(homeBackground)
+            .warmAppBackground(top: Color(red: 0.95, green: 0.96, blue: 0.94), middle: Color(red: 0.92, green: 0.93, blue: 0.91))
             .task(id: session.userId) {
                 if let userId = session.userId {
                     await viewModel.load(userId: userId)
@@ -68,103 +68,60 @@ struct HomeView: View {
         }
     }
 
-    private var homeBackground: some View {
-        LinearGradient(
-            colors: [
-                Color(red: 0.95, green: 0.96, blue: 0.94),
-                Color(red: 0.92, green: 0.93, blue: 0.91),
-                Color(.systemGroupedBackground)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
-    }
-
     private func flagshipHero(summary: HomeSummary) -> some View {
-        ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.14, green: 0.18, blue: 0.17),
-                            Color(red: 0.21, green: 0.28, blue: 0.24),
-                            Color(red: 0.31, green: 0.36, blue: 0.30)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(alignment: .topTrailing) {
-                    ZStack {
-                        Circle()
-                            .fill(Color.white.opacity(0.08))
-                            .frame(width: 220, height: 220)
-                            .offset(x: 70, y: -90)
-                        Circle()
-                            .fill(Color.white.opacity(0.06))
-                            .frame(width: 140, height: 140)
-                            .offset(x: 10, y: 50)
-                    }
-                }
-                .overlay(
-                    RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                )
-                .shadow(color: Color.black.opacity(0.14), radius: 24, x: 0, y: 14)
-
-            VStack(alignment: .leading, spacing: 22) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Today")
-                            .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                        Text(heroSummaryLine(summary: summary))
-                            .font(.subheadline)
-                            .foregroundColor(Color.white.opacity(0.78))
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 8) {
-                        Text("Movement")
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(Color.white.opacity(0.68))
-                            .textCase(.uppercase)
-                        Text(String(format: "%.1f km", summary.today.distanceKm))
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
-                    }
+        WarmHeroCard {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Today")
+                        .font(.system(size: 38, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    Text(heroSummaryLine(summary: summary))
+                        .font(.subheadline)
+                        .foregroundColor(Color.white.opacity(0.78))
                 }
 
-                HStack(spacing: 14) {
-                    heroStat(value: "\(summary.today.steps)", label: "steps")
-                    heroStat(value: "\(summary.activeFootwear.count)", label: "active pairs")
-                    heroStat(value: "\(summary.unassignedWear.count)", label: "to review")
-                }
+                Spacer()
 
-                if let currentDefault = summary.currentDefault {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Current default")
-                            .font(.caption.weight(.semibold))
-                            .foregroundColor(Color.white.opacity(0.68))
-                            .textCase(.uppercase)
-                        Text(currentDefault.displayName)
-                            .font(.title3.weight(.semibold))
-                            .foregroundColor(.white)
-                        Text("Your fallback pair when movement needs somewhere predictable to land.")
-                            .font(.subheadline)
-                            .foregroundColor(Color.white.opacity(0.74))
-                    }
+                VStack(alignment: .trailing, spacing: 8) {
+                    Text("Movement")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(Color.white.opacity(0.68))
+                        .textCase(.uppercase)
+                    Text(String(format: "%.1f km", summary.today.distanceKm))
+                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
                 }
             }
-            .padding(26)
+
+            HStack(spacing: 14) {
+                WarmHeroStat(value: "\(summary.today.steps)", label: "steps")
+                WarmHeroStat(value: "\(summary.activeFootwear.count)", label: "active pairs")
+                WarmHeroStat(value: "\(summary.unassignedWear.count)", label: "to review")
+            }
+
+            if let currentDefault = summary.currentDefault {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Current default")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(Color.white.opacity(0.68))
+                        .textCase(.uppercase)
+                    Text(currentDefault.displayName)
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.white)
+                    Text("Your fallback pair when movement needs somewhere predictable to land.")
+                        .font(.subheadline)
+                        .foregroundColor(Color.white.opacity(0.74))
+                }
+            }
         }
     }
 
     private func dailyMovementSection(summary: HomeSummary) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader(title: "Today’s movement", detail: summary.today.steps > 0 ? "A softer read on how far the day has carried you." : "Nothing has been tracked yet.")
+            WarmSectionHeader(
+                title: "Today’s movement",
+                detail: summary.today.steps > 0 ? "A softer read on how far the day has carried you." : "Nothing has been tracked yet."
+            )
 
             HStack(alignment: .top, spacing: 14) {
                 oversizedMetricCard(
@@ -191,21 +148,17 @@ struct HomeView: View {
 
     private func reviewAndDefaultSection(summary: HomeSummary) -> some View {
         HStack(alignment: .top, spacing: 14) {
-            VStack(alignment: .leading, spacing: 14) {
-                sectionHeader(title: "Needs review", detail: reviewLine(summary: summary))
+            WarmSurfaceCard {
+                WarmSectionHeader(title: "Needs review", detail: reviewLine(summary: summary))
 
                 Text(summary.unassignedWear.count == 0 ? "Your imported movement is in a good state." : String(format: "%.1f km still has no footwear attached.", summary.unassignedWear.distanceKm))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-            .padding(18)
             .frame(maxWidth: .infinity, minHeight: 170, alignment: .topLeading)
-            .background(Color.white.opacity(0.74))
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .shadow(color: Color.black.opacity(0.05), radius: 14, x: 0, y: 8)
 
             VStack(alignment: .leading, spacing: 14) {
-                sectionHeader(title: "Default footwear", detail: summary.currentDefault?.displayName ?? "No fallback pair set yet")
+                WarmSectionHeader(title: "Default footwear", detail: summary.currentDefault?.displayName ?? "No fallback pair set yet")
 
                 Text(summary.currentDefault == nil ? "Pick one to make assignment behaviour more predictable." : "Used when you want movement to land somewhere stable.")
                     .font(.subheadline)
@@ -230,7 +183,7 @@ struct HomeView: View {
 
     private func rotationSection(summary: HomeSummary) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader(title: "In rotation", detail: "The pairs currently carrying your walking life.")
+            WarmSectionHeader(title: "In rotation", detail: "The pairs currently carrying your walking life.")
 
             if summary.activeFootwear.isEmpty {
                 Text("Add footwear to start building a real rotation.")
@@ -238,89 +191,53 @@ struct HomeView: View {
                     .softPanelStyle()
             } else {
                 ForEach(summary.activeFootwear) { item in
-                    HStack(alignment: .top, spacing: 16) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color(.tertiarySystemGroupedBackground))
-                                .frame(width: 62, height: 62)
-                            Image(systemName: "shoeprints.fill")
-                                .font(.title3)
-                                .foregroundColor(.secondary)
-                        }
+                    WarmSurfaceCard {
+                        HStack(alignment: .top, spacing: 16) {
+                            WarmIconTile(systemName: "shoeprints.fill", tint: Color(red: 0.92, green: 0.90, blue: 0.84), size: 62)
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(item.displayName)
-                                        .font(.headline)
-                                    Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(alignment: .top) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(item.displayName)
+                                            .font(.headline)
+                                        Text(item.category.replacingOccurrences(of: "_", with: " ").capitalized)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+
+                                    Spacer()
+
+                                    if item.isDefaultFallback {
+                                        Text("Default")
+                                            .font(.caption.weight(.semibold))
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Color.green.opacity(0.12))
+                                            .foregroundColor(.green)
+                                            .clipShape(Capsule())
+                                    }
+                                }
+
+                                if let lifecycle = item.lifecycleSummary {
+                                    HStack(spacing: 16) {
+                                        inlineFact(label: "Steps", value: "\(lifecycle.totalSteps)")
+                                        inlineFact(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
+                                    }
+
+                                    Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
+                                } else {
+                                    Text("No wear has been assigned to this footwear yet.")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
                                 }
-
-                                Spacer()
-
-                                if item.isDefaultFallback {
-                                    Text("Default")
-                                        .font(.caption.weight(.semibold))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                        .background(Color.green.opacity(0.12))
-                                        .foregroundColor(.green)
-                                        .clipShape(Capsule())
-                                }
-                            }
-
-                            if let lifecycle = item.lifecycleSummary {
-                                HStack(spacing: 16) {
-                                    inlineFact(label: "Steps", value: "\(lifecycle.totalSteps)")
-                                    inlineFact(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
-                                }
-
-                                Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
-                            } else {
-                                Text("No wear has been assigned to this footwear yet.")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
                             }
                         }
                     }
-                    .padding(18)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white.opacity(0.78))
-                    .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-                    .shadow(color: Color.black.opacity(0.05), radius: 14, x: 0, y: 8)
                 }
             }
         }
-    }
-
-    private func sectionHeader(title: String, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.title3)
-                .bold()
-            Text(detail)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    private func heroStat(value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text(label)
-                .font(.caption)
-                .foregroundColor(Color.white.opacity(0.7))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.white.opacity(0.10))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func oversizedMetricCard(label: String, value: String, detail: String) -> some View {

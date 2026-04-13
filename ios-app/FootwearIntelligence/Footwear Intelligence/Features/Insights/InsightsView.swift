@@ -126,7 +126,7 @@ struct InsightsView: View {
         }
     }
 
-    private func insightsHero(summary: InsightsSummary) -> some View {
+    private func insightsHero(summary: InsightSummary) -> some View {
         WarmHeroCard {
             Text("Insights")
                 .font(.system(size: 36, weight: .bold, design: .rounded))
