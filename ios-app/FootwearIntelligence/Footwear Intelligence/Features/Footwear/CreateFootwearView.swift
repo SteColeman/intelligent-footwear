@@ -1,9 +1,13 @@
 import SwiftUI
+import PhotosUI
 
 struct CreateFootwearView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject var session: AppSession
     @StateObject private var viewModel = CreateFootwearViewModel()
+
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var selectedImage: Image?
 
     var body: some View {
         NavigationStack {
@@ -41,10 +45,37 @@ struct CreateFootwearView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Photo")
                             .font(.headline)
-                        Text("For now, add an image URL for the primary photo. Proper photo picking can come next.")
+
+                        Text("You can preview a real image now. Saving still uses a photo URL until storage/upload is wired properly.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
-                        TextField("https://…", text: $viewModel.photoUrl)
+
+                        if let selectedImage {
+                            selectedImage
+                                .resizable()
+                                .scaledToFill()
+                                .frame(height: 180)
+                                .frame(maxWidth: .infinity)
+                                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                        }
+
+                        PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                            Text(selectedImage == nil ? "Choose photo" : "Change photo")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color(.tertiarySystemGroupedBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+
+                        if selectedImage != nil {
+                            Button("Remove photo") {
+                                selectedPhotoItem = nil
+                                selectedImage = nil
+                            }
+                            .foregroundColor(.red)
+                        }
+
+                        TextField("Optional image URL for backend save", text: $viewModel.photoUrl)
                             .textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
@@ -92,6 +123,21 @@ struct CreateFootwearView: View {
                     .disabled(viewModel.isSaving)
                 }
             }
+            .task(id: selectedPhotoItem) {
+                guard let selectedPhotoItem else { return }
+                await loadPreviewImage(from: selectedPhotoItem)
+            }
+        }
+    }
+
+    private func loadPreviewImage(from item: PhotosPickerItem) async {
+        do {
+            if let data = try await item.loadTransferable(type: Data.self),
+               let uiImage = UIImage(data: data) {
+                selectedImage = Image(uiImage: uiImage)
+            }
+        } catch {
+            viewModel.errorMessage = error.localizedDescription
         }
     }
 }
