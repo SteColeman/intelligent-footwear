@@ -22,6 +22,17 @@ final class CreateFootwearViewModel: ObservableObject {
         "other"
     ]
 
+    func setLocalPhoto(data: Data) throws {
+        let directory = try ensurePhotoDirectory()
+        let fileURL = directory.appendingPathComponent("\(UUID().uuidString).jpg")
+        try data.write(to: fileURL, options: .atomic)
+        photoUrl = fileURL.absoluteString
+    }
+
+    func clearLocalPhoto() {
+        photoUrl = ""
+    }
+
     func save(userId: String) async {
         guard !brand.isEmpty, !model.isEmpty else {
             errorMessage = "Brand and model are required"
@@ -33,6 +44,8 @@ final class CreateFootwearViewModel: ObservableObject {
         didSave = false
 
         do {
+            let trimmedPhotoUrl = photoUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+
             let payload = CreateFootwearRequest(
                 userId: userId,
                 brand: brand,
@@ -44,7 +57,7 @@ final class CreateFootwearViewModel: ObservableObject {
                 targetSteps: nil,
                 targetDistanceKm: nil,
                 isDefaultFallback: isDefaultFallback,
-                photoUrl: photoUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : photoUrl.trimmingCharacters(in: .whitespacesAndNewlines),
+                photoUrl: trimmedPhotoUrl.isEmpty ? nil : trimmedPhotoUrl,
                 notes: nil
             )
 
@@ -55,5 +68,16 @@ final class CreateFootwearViewModel: ObservableObject {
         }
 
         isSaving = false
+    }
+
+    private func ensurePhotoDirectory() throws -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let directory = base.appendingPathComponent("FootwearPhotos", isDirectory: true)
+
+        if !FileManager.default.fileExists(atPath: directory.path) {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+
+        return directory
     }
 }

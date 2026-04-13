@@ -46,7 +46,7 @@ struct CreateFootwearView: View {
                         Text("Photo")
                             .font(.headline)
 
-                        Text("You can preview a real image now. Saving still uses a photo URL until storage/upload is wired properly.")
+                        Text("Choose a real image for this pair. For the current prototype, it will be stored locally on the device and used as the primary photo.")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
 
@@ -67,15 +67,16 @@ struct CreateFootwearView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
 
-                        if selectedImage != nil {
+                        if selectedImage != nil || !viewModel.photoUrl.isEmpty {
                             Button("Remove photo") {
                                 selectedPhotoItem = nil
                                 selectedImage = nil
+                                viewModel.clearLocalPhoto()
                             }
                             .foregroundColor(.red)
                         }
 
-                        TextField("Optional image URL for backend save", text: $viewModel.photoUrl)
+                        TextField("Optional image URL override", text: $viewModel.photoUrl)
                             .textFieldStyle(.roundedBorder)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
@@ -135,6 +136,7 @@ struct CreateFootwearView: View {
             if let data = try await item.loadTransferable(type: Data.self),
                let uiImage = UIImage(data: data) {
                 selectedImage = Image(uiImage: uiImage)
+                try viewModel.setLocalPhoto(data: data)
             }
         } catch {
             viewModel.errorMessage = error.localizedDescription
