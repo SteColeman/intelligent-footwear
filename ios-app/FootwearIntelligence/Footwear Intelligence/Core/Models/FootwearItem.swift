@@ -15,6 +15,7 @@ struct FootwearItem: Identifiable, Codable {
     let category: String
     let status: String
     let isDefaultFallback: Bool
+    let photoUrl: String?
     let lifecycleSummary: LifecycleSummaryLite?
 
     var displayName: String {

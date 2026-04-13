@@ -8,6 +8,7 @@ final class CreateFootwearViewModel: ObservableObject {
     @Published var nickname = ""
     @Published var category = "trainers"
     @Published var isDefaultFallback = false
+    @Published var photoUrl = ""
     @Published var isSaving = false
     @Published var errorMessage: String?
     @Published var didSave = false
@@ -43,6 +44,7 @@ final class CreateFootwearViewModel: ObservableObject {
                 targetSteps: nil,
                 targetDistanceKm: nil,
                 isDefaultFallback: isDefaultFallback,
+                photoUrl: photoUrl.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : photoUrl.trimmingCharacters(in: .whitespacesAndNewlines),
                 notes: nil
             )
 

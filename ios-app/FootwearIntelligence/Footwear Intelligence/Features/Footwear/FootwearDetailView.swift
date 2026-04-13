@@ -17,7 +17,7 @@ struct FootwearDetailView: View {
                     .padding(.top, 30)
             }
         }
-        .background(detailBackground)
+        .warmAppBackground(top: Color(red: 0.94, green: 0.93, blue: 0.89), middle: Color(red: 0.90, green: 0.91, blue: 0.87))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.userId != nil {
@@ -41,20 +41,6 @@ struct FootwearDetailView: View {
                 await viewModel.load(footwearItemId: footwearItemId, userId: userId)
             }
         }
-    }
-
-    private var detailBackground: some View {
-        LinearGradient(
-            colors: [
-                Color(red: 0.94, green: 0.93, blue: 0.89),
-                Color(red: 0.90, green: 0.91, blue: 0.87),
-                Color(red: 0.86, green: 0.88, blue: 0.84),
-                Color(.systemGroupedBackground)
-            ],
-            startPoint: .top,
-            endPoint: .bottom
-        )
-        .ignoresSafeArea()
     }
 
     @ViewBuilder
@@ -158,23 +144,7 @@ struct FootwearDetailView: View {
                 }
 
                 HStack(alignment: .center, spacing: 20) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 28, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.white.opacity(0.12), Color(red: 0.83, green: 0.86, blue: 0.74).opacity(0.18)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 138, height: 138)
-                        Circle()
-                            .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                            .frame(width: 102, height: 102)
-                        Image(systemName: "shoeprints.fill")
-                            .font(.system(size: 42, weight: .medium))
-                            .foregroundColor(.white.opacity(0.88))
-                    }
+                    heroImageBlock(for: item)
 
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Current read")
@@ -195,9 +165,9 @@ struct FootwearDetailView: View {
                 }
 
                 HStack(spacing: 14) {
-                    heroMetric(value: "\(lifecycle.totalSteps)", label: "steps")
-                    heroMetric(value: String(format: "%.1f km", lifecycle.totalDistanceKm), label: "distance")
-                    heroMetric(value: lifecycle.retirementRiskLevel.capitalized, label: "risk")
+                    WarmHeroStat(value: "\(lifecycle.totalSteps)", label: "steps")
+                    WarmHeroStat(value: String(format: "%.1f km", lifecycle.totalDistanceKm), label: "distance")
+                    WarmHeroStat(value: lifecycle.retirementRiskLevel.capitalized, label: "risk")
                 }
             }
             .padding(28)
@@ -237,9 +207,48 @@ struct FootwearDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private func heroImageBlock(for item: FootwearItem) -> some View {
+        if let photoUrl = item.photoUrl, let url = URL(string: photoUrl) {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFill()
+            } placeholder: {
+                ProgressView()
+                    .tint(.white.opacity(0.75))
+            }
+            .frame(width: 138, height: 138)
+            .background(Color.white.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
+            )
+        } else {
+            ZStack {
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.12), Color(red: 0.83, green: 0.86, blue: 0.74).opacity(0.18)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 138, height: 138)
+                Circle()
+                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
+                    .frame(width: 102, height: 102)
+                Image(systemName: "shoeprints.fill")
+                    .font(.system(size: 42, weight: .medium))
+                    .foregroundColor(.white.opacity(0.88))
+            }
+        }
+    }
+
     private func sculptedMetricsSection(lifecycle: LifecycleSummaryLite) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader(title: "Wear trajectory", detail: "A richer, less flat read on how this pair is ageing in real use.")
+            WarmSectionHeader(title: "Wear trajectory", detail: "A richer, less flat read on how this pair is ageing in real use.")
 
             HStack(alignment: .top, spacing: 14) {
                 radialLifecycleCard(lifecycle: lifecycle)
@@ -271,7 +280,7 @@ struct FootwearDetailView: View {
     private func radialLifecycleCard(lifecycle: LifecycleSummaryLite) -> some View {
         let progress = inferredLifecycleProgress(lifecycle: lifecycle)
 
-        return VStack(alignment: .leading, spacing: 14) {
+        return WarmSurfaceCard {
             Text("Lifecycle")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -305,30 +314,16 @@ struct FootwearDetailView: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
         }
-        .padding(22)
         .frame(maxWidth: .infinity, minHeight: 332, alignment: .topLeading)
-        .background(
-            LinearGradient(
-                colors: [Color.white.opacity(0.88), Color(red: 0.95, green: 0.93, blue: 0.87)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .stroke(Color.white.opacity(0.80), lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.07), radius: 16, x: 0, y: 10)
     }
 
     private func lifecycleReadSection(lifecycle: LifecycleSummaryLite) -> some View {
         let progress = inferredLifecycleProgress(lifecycle: lifecycle)
 
         return VStack(alignment: .leading, spacing: 16) {
-            sectionHeader(title: "Lifecycle read", detail: "Not a hard replacement rule — a calmer interpretation of wear plus condition signals.")
+            WarmSectionHeader(title: "Lifecycle read", detail: "Not a hard replacement rule — a calmer interpretation of wear plus condition signals.")
 
-            VStack(alignment: .leading, spacing: 16) {
+            WarmSurfaceCard {
                 Text(SoftUtilityRiskTone.longLabel(for: lifecycle.retirementRiskLevel))
                     .font(.title3.weight(.semibold))
 
@@ -362,27 +357,12 @@ struct FootwearDetailView: View {
                     .frame(height: 12)
                 }
             }
-            .padding(22)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(
-                    colors: [Color.white.opacity(0.86), Color(red: 0.93, green: 0.91, blue: 0.85)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 30, style: .continuous)
-                    .stroke(Color.white.opacity(0.70), lineWidth: 1)
-            )
-            .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 8)
         }
     }
 
     private var conditionHistorySection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            sectionHeader(title: "Condition history", detail: "Snapshots of how the object actually felt over time.")
+            WarmSectionHeader(title: "Condition history", detail: "Snapshots of how the object actually felt over time.")
 
             if !viewModel.hasConditionHistory {
                 Text("Condition check-ins will appear here once you start logging them.")
@@ -390,7 +370,7 @@ struct FootwearDetailView: View {
                     .softPanelStyle()
             } else {
                 ForEach(viewModel.conditionLogs) { log in
-                    VStack(alignment: .leading, spacing: 16) {
+                    WarmSurfaceCard {
                         HStack(alignment: .top) {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(log.loggedAt.formatted(date: .abbreviated, time: .shortened))
@@ -423,50 +403,9 @@ struct FootwearDetailView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                    .padding(22)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.88), Color(red: 0.95, green: 0.93, blue: 0.87)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 30, style: .continuous)
-                            .stroke(Color.white.opacity(0.78), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.06), radius: 14, x: 0, y: 8)
                 }
             }
         }
-    }
-
-    private func sectionHeader(title: String, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.title3)
-                .bold()
-            Text(detail)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-    }
-
-    private func heroMetric(value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
-            Text(label)
-                .font(.caption)
-                .foregroundColor(Color.white.opacity(0.68))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.white.opacity(0.10))
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func compactTintedMetric(label: String, value: String, detail: String, tint: Color) -> some View {

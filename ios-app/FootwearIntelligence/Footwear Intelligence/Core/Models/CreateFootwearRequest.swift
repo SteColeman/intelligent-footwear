@@ -11,5 +11,6 @@ struct CreateFootwearRequest: Codable {
     let targetSteps: Int?
     let targetDistanceKm: Double?
     let isDefaultFallback: Bool?
+    let photoUrl: String?
     let notes: String?
 }

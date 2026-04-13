@@ -38,6 +38,19 @@ struct CreateFootwearView: View {
                     }
                     .elevatedPanelStyle()
 
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Photo")
+                            .font(.headline)
+                        Text("For now, add an image URL for the primary photo. Proper photo picking can come next.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        TextField("https://…", text: $viewModel.photoUrl)
+                            .textFieldStyle(.roundedBorder)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.URL)
+                    }
+                    .softPanelStyle()
+
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .foregroundColor(.red)
