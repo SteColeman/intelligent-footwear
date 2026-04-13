@@ -15,7 +15,13 @@ const createFootwearSchema = z.object({
   targetSteps: z.number().int().positive().optional(),
   targetDistanceKm: z.number().positive().optional(),
   isDefaultFallback: z.boolean().optional(),
+  photoUrl: z.string().optional(),
   notes: z.string().optional(),
+});
+
+const updateFootwearPhotoSchema = z.object({
+  userId: z.string(),
+  photoUrl: z.string().nullable().optional(),
 });
 
 async function attachLifecycleSummary<T extends { id: string }>(items: T[]) {
@@ -84,6 +90,7 @@ export async function footwearRoutes(app: FastifyInstance) {
         targetSteps: body.targetSteps,
         targetDistanceKm: body.targetDistanceKm,
         isDefaultFallback: body.isDefaultFallback ?? false,
+        photoUrl: body.photoUrl,
         status: 'active',
         notes: body.notes,
       },
@@ -91,6 +98,29 @@ export async function footwearRoutes(app: FastifyInstance) {
 
     await recomputeLifecycleSummary(created.id);
     const [itemWithSummary] = await attachLifecycleSummary([created]);
+    return itemWithSummary;
+  });
+
+  app.patch('/footwear/:id/photo', async request => {
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = updateFootwearPhotoSchema.parse(request.body);
+
+    const item = await prisma.footwearItem.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!item || item.userId !== body.userId) {
+      throw new AppError('Footwear item not found for user', 404);
+    }
+
+    const updated = await prisma.footwearItem.update({
+      where: { id: params.id },
+      data: {
+        photoUrl: body.photoUrl ?? null,
+      },
+    });
+
+    const [itemWithSummary] = await attachLifecycleSummary([updated]);
     return itemWithSummary;
   });
 

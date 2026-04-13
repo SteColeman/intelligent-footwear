@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct FootwearDetailView: View {
     @EnvironmentObject var session: AppSession
@@ -6,6 +7,9 @@ struct FootwearDetailView: View {
 
     @StateObject private var viewModel = FootwearDetailViewModel()
     @State private var showingConditionCheckIn = false
+    @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var isUpdatingPhoto = false
+    @State private var photoUpdateError: String?
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -41,6 +45,10 @@ struct FootwearDetailView: View {
                 await viewModel.load(footwearItemId: footwearItemId, userId: userId)
             }
         }
+        .task(id: selectedPhotoItem) {
+            guard let selectedPhotoItem else { return }
+            await updatePhoto(from: selectedPhotoItem)
+        }
     }
 
     @ViewBuilder
@@ -67,6 +75,7 @@ struct FootwearDetailView: View {
         } else if let item = viewModel.item, let lifecycle = item.lifecycleSummary {
             VStack(alignment: .leading, spacing: 28) {
                 objectHero(for: item, lifecycle: lifecycle)
+                photoManagementSection(item: item, userId: userId)
                 sculptedMetricsSection(lifecycle: lifecycle)
                 lifecycleReadSection(lifecycle: lifecycle)
                 conditionHistorySection
@@ -76,6 +85,7 @@ struct FootwearDetailView: View {
         } else if let item = viewModel.item {
             VStack(alignment: .leading, spacing: 24) {
                 objectHeroWithoutLifecycle(for: item)
+                photoManagementSection(item: item, userId: userId)
 
                 Text("No lifecycle data has been built for this footwear yet.")
                     .foregroundColor(.secondary)
@@ -204,6 +214,46 @@ struct FootwearDetailView: View {
                     .foregroundColor(Color.white.opacity(0.78))
             }
             .padding(28)
+        }
+    }
+
+    private func photoManagementSection(item: FootwearItem, userId: String) -> some View {
+        WarmSurfaceCard {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Primary photo")
+                        .font(.headline)
+                    Text("Change the image used to represent this footwear across the app.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+            }
+
+            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                Text(isUpdatingPhoto ? "Updating..." : (item.photoUrl == nil ? "Choose photo" : "Change photo"))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color(.tertiarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .disabled(isUpdatingPhoto)
+
+            if item.photoUrl != nil {
+                Button("Remove photo") {
+                    Task {
+                        await clearPhoto(userId: userId)
+                    }
+                }
+                .foregroundColor(.red)
+                .disabled(isUpdatingPhoto)
+            }
+
+            if let photoUpdateError {
+                Text(photoUpdateError)
+                    .foregroundColor(.red)
+            }
         }
     }
 
@@ -520,5 +570,59 @@ struct FootwearDetailView: View {
         case 3: return .orange
         default: return .green
         }
+    }
+
+    private func updatePhoto(from item: PhotosPickerItem) async {
+        guard let userId = session.userId else { return }
+
+        isUpdatingPhoto = true
+        photoUpdateError = nil
+
+        do {
+            if let data = try await item.loadTransferable(type: Data.self) {
+                let fileURL = try persistSelectedPhoto(data: data)
+                _ = try await APIClient.shared.updateFootwearPhoto(
+                    userId: userId,
+                    footwearItemId: footwearItemId,
+                    photoUrl: fileURL.absoluteString
+                )
+                await viewModel.load(footwearItemId: footwearItemId, userId: userId)
+            }
+        } catch {
+            photoUpdateError = error.localizedDescription
+        }
+
+        isUpdatingPhoto = false
+    }
+
+    private func clearPhoto(userId: String) async {
+        isUpdatingPhoto = true
+        photoUpdateError = nil
+
+        do {
+            _ = try await APIClient.shared.updateFootwearPhoto(
+                userId: userId,
+                footwearItemId: footwearItemId,
+                photoUrl: nil
+            )
+            await viewModel.load(footwearItemId: footwearItemId, userId: userId)
+        } catch {
+            photoUpdateError = error.localizedDescription
+        }
+
+        isUpdatingPhoto = false
+    }
+
+    private func persistSelectedPhoto(data: Data) throws -> URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        let directory = base.appendingPathComponent("FootwearPhotos", isDirectory: true)
+
+        if !FileManager.default.fileExists(atPath: directory.path) {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        }
+
+        let fileURL = directory.appendingPathComponent("\(UUID().uuidString).jpg")
+        try data.write(to: fileURL, options: .atomic)
+        return fileURL
     }
 }
