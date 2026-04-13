@@ -252,15 +252,15 @@ struct FootwearDetailView: View {
                         tint: Color(red: 0.87, green: 0.90, blue: 0.82)
                     )
                     compactTintedMetric(
-                        label: "Assigned days",
-                        value: "\(lifecycle.assignedDaysCount)",
-                        detail: "days in rotation",
+                        label: "Steps",
+                        value: "\(lifecycle.totalSteps)",
+                        detail: "tracked so far",
                         tint: Color(red: 0.93, green: 0.87, blue: 0.78)
                     )
                     compactTintedMetric(
-                        label: "Remaining",
-                        value: remainingDistanceText(lifecycle: lifecycle),
-                        detail: "estimated distance",
+                        label: "Confidence",
+                        value: confidenceText(lifecycle: lifecycle),
+                        detail: "signal quality",
                         tint: softenedRiskTint(for: lifecycle.retirementRiskLevel)
                     )
                 }
@@ -269,7 +269,7 @@ struct FootwearDetailView: View {
     }
 
     private func radialLifecycleCard(lifecycle: LifecycleSummaryLite) -> some View {
-        let progress = min(max(lifecycle.lifecycleProgressPct ?? 0.42, 0.08), 0.98)
+        let progress = inferredLifecycleProgress(lifecycle: lifecycle)
 
         return VStack(alignment: .leading, spacing: 14) {
             Text("Lifecycle")
@@ -323,44 +323,43 @@ struct FootwearDetailView: View {
     }
 
     private func lifecycleReadSection(lifecycle: LifecycleSummaryLite) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
+        let progress = inferredLifecycleProgress(lifecycle: lifecycle)
+
+        return VStack(alignment: .leading, spacing: 16) {
             sectionHeader(title: "Lifecycle read", detail: "Not a hard replacement rule — a calmer interpretation of wear plus condition signals.")
 
             VStack(alignment: .leading, spacing: 16) {
                 Text(SoftUtilityRiskTone.longLabel(for: lifecycle.retirementRiskLevel))
                     .font(.title3.weight(.semibold))
 
-                if let remainingSteps = lifecycle.estimatedRemainingSteps {
-                    infoRow(label: "Estimated remaining steps", value: "\(remainingSteps)")
+                infoRow(label: "Steps tracked", value: "\(lifecycle.totalSteps)")
+                infoRow(label: "Distance tracked", value: String(format: "%.1f km", lifecycle.totalDistanceKm))
+
+                if let confidenceScore = lifecycle.confidenceScore {
+                    infoRow(label: "Confidence score", value: String(format: "%.2f", confidenceScore))
                 }
 
-                if let remainingDistance = lifecycle.estimatedRemainingDistanceKm {
-                    infoRow(label: "Estimated remaining distance", value: String(format: "%.1f km", remainingDistance))
-                }
-
-                if let progress = lifecycle.lifecycleProgressPct {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("Lifecycle progress")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                            Text(String(format: "%.0f%%", progress * 100))
-                                .font(.subheadline.weight(.semibold))
-                        }
-
-                        GeometryReader { proxy in
-                            let width = max(proxy.size.width * progress, 16)
-                            ZStack(alignment: .leading) {
-                                Capsule()
-                                    .fill(Color.black.opacity(0.08))
-                                Capsule()
-                                    .fill(progressGradient(for: lifecycle.retirementRiskLevel))
-                                    .frame(width: width)
-                            }
-                        }
-                        .frame(height: 12)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Lifecycle progress")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text(String(format: "%.0f%%", progress * 100))
+                            .font(.subheadline.weight(.semibold))
                     }
+
+                    GeometryReader { proxy in
+                        let width = max(proxy.size.width * progress, 16)
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(Color.black.opacity(0.08))
+                            Capsule()
+                                .fill(progressGradient(for: lifecycle.retirementRiskLevel))
+                                .frame(width: width)
+                        }
+                    }
+                    .frame(height: 12)
                 }
             }
             .padding(22)
@@ -523,12 +522,22 @@ struct FootwearDetailView: View {
             .clipShape(Capsule())
     }
 
-    private func remainingDistanceText(lifecycle: LifecycleSummaryLite) -> String {
-        if let remainingDistance = lifecycle.estimatedRemainingDistanceKm {
-            return String(format: "%.1f km", remainingDistance)
+    private func confidenceText(lifecycle: LifecycleSummaryLite) -> String {
+        if let confidenceScore = lifecycle.confidenceScore {
+            return String(format: "%.2f", confidenceScore)
         }
 
         return "—"
+    }
+
+    private func inferredLifecycleProgress(lifecycle: LifecycleSummaryLite) -> Double {
+        let distanceProgress = min(max(lifecycle.totalDistanceKm / 800, 0.08), 0.95)
+
+        switch lifecycle.retirementRiskLevel.lowercased() {
+        case "high": return max(distanceProgress, 0.82)
+        case "medium": return max(distanceProgress, 0.58)
+        default: return max(distanceProgress, 0.28)
+        }
     }
 
     private func softenedRiskTint(for level: String) -> Color {
