@@ -257,43 +257,17 @@ struct FootwearDetailView: View {
         }
     }
 
-    @ViewBuilder
     private func heroImageBlock(for item: FootwearItem) -> some View {
-        if let photoUrl = item.photoUrl, let url = URL(string: photoUrl) {
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-            } placeholder: {
-                ProgressView()
-                    .tint(.white.opacity(0.75))
-            }
-            .frame(width: 138, height: 138)
-            .background(Color.white.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
-            )
-        } else {
-            ZStack {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [Color.white.opacity(0.12), Color(red: 0.83, green: 0.86, blue: 0.74).opacity(0.18)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 138, height: 138)
-                Circle()
-                    .stroke(Color.white.opacity(0.10), lineWidth: 1)
-                    .frame(width: 102, height: 102)
-                Image(systemName: "shoeprints.fill")
-                    .font(.system(size: 42, weight: .medium))
-                    .foregroundColor(.white.opacity(0.88))
-            }
-        }
+        FootwearPhotoView(
+            photoUrl: item.photoUrl,
+            size: 138,
+            cornerRadius: 28,
+            tint: Color(red: 0.83, green: 0.86, blue: 0.74),
+            iconFont: .system(size: 42, weight: .medium),
+            progressTint: .white.opacity(0.75),
+            backgroundOpacity: 0.08,
+            strokeOpacity: 0.10
+        )
     }
 
     private func sculptedMetricsSection(lifecycle: LifecycleSummaryLite) -> some View {

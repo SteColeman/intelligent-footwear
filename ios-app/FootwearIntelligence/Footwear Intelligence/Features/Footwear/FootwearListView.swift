@@ -116,7 +116,15 @@ struct FootwearListView: View {
             } label: {
                 WarmSurfaceCard {
                     HStack(alignment: .top, spacing: 14) {
-                        footwearThumbnail(for: item, size: 72)
+                        FootwearPhotoView(
+                            photoUrl: item.photoUrl,
+                            size: 72,
+                            cornerRadius: 22,
+                            tint: Color(red: 0.90, green: 0.89, blue: 0.81),
+                            iconFont: .title2,
+                            progressTint: .secondary,
+                            backgroundOpacity: 0.35
+                        )
 
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(alignment: .top) {
@@ -168,29 +176,6 @@ struct FootwearListView: View {
                 Text("Log condition")
             }
             .font(.subheadline.weight(.medium))
-        }
-    }
-
-    @ViewBuilder
-    private func footwearThumbnail(for item: FootwearItem, size: CGFloat) -> some View {
-        if let photoUrl = item.photoUrl, let url = URL(string: photoUrl) {
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .scaledToFill()
-            } placeholder: {
-                ProgressView()
-                    .tint(.secondary)
-            }
-            .frame(width: size, height: size)
-            .background(Color.white.opacity(0.35))
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        } else {
-            WarmIconTile(
-                systemName: "shoeprints.fill",
-                tint: Color(red: 0.90, green: 0.89, blue: 0.81),
-                size: size
-            )
         }
     }
 
