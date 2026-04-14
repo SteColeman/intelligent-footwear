@@ -69,6 +69,14 @@ struct AssignView: View {
         .padding(.vertical, 16)
     }
 
+    private var activeAssignableItems: [FootwearItem] {
+        viewModel.footwearItems.filter { $0.status == "active" }
+    }
+
+    private var inactiveAssignableItems: [FootwearItem] {
+        viewModel.footwearItems.filter { $0.status != "active" }
+    }
+
     private var assignHero: some View {
         WarmHeroCard {
             Text("Assign wear")
@@ -80,7 +88,7 @@ struct AssignView: View {
 
             HStack(spacing: 12) {
                 WarmHeroStat(value: "\(viewModel.unassignedWear.count)", label: "to review")
-                WarmHeroStat(value: viewModel.hasLoadedAssignableFootwear ? "ready" : "waiting", label: "footwear")
+                WarmHeroStat(value: "\(activeAssignableItems.count)", label: "active pairs")
             }
         }
     }
@@ -129,13 +137,13 @@ struct AssignView: View {
                 metricTile(label: "Distance", value: String(format: "%.1f km", event.distanceKm ?? 0), tint: Color(red: 0.93, green: 0.87, blue: 0.78))
             }
 
-            if viewModel.hasLoadedAssignableFootwear {
+            if !activeAssignableItems.isEmpty {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Assign to")
                         .font(.subheadline.weight(.medium))
                         .foregroundColor(.secondary)
 
-                    ForEach(viewModel.footwearItems) { item in
+                    ForEach(activeAssignableItems) { item in
                         Button {
                             Task {
                                 await viewModel.assign(userId: userId, wearEventId: event.id, footwearItemId: item.id)
@@ -171,6 +179,15 @@ struct AssignView: View {
                         }
                     }
                 }
+
+                if !inactiveAssignableItems.isEmpty {
+                    Text("Retired and archived footwear is excluded from normal assignment targets.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            } else if !viewModel.footwearItems.isEmpty {
+                Text("No active footwear is available for assignment right now.")
+                    .foregroundColor(.secondary)
             } else {
                 Text("Add footwear before assigning wear.")
                     .foregroundColor(.secondary)

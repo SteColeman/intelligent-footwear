@@ -19,14 +19,14 @@ struct InsightsView: View {
                             HStack(spacing: 14) {
                                 headlineMetric(
                                     label: "Most worn",
-                                    value: "\(summary.mostWorn.count)",
-                                    caption: "pairs with strongest wear history",
+                                    value: "\(activeMostWorn(from: summary).count)",
+                                    caption: "active pairs with strongest wear history",
                                     tint: Color(red: 0.87, green: 0.90, blue: 0.82)
                                 )
                                 headlineMetric(
                                     label: "Watch list",
-                                    value: "\(summary.needsAttention.count)",
-                                    caption: "pairs worth checking soon",
+                                    value: "\(activeNeedsAttention(from: summary).count)",
+                                    caption: "active pairs worth checking soon",
                                     tint: Color(red: 0.93, green: 0.87, blue: 0.78)
                                 )
                             }
@@ -34,13 +34,13 @@ struct InsightsView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 WarmSectionHeader(
                                     title: "Most worn",
-                                    detail: "The pairs building the strongest real-life wear history."
+                                    detail: "The active pairs building the strongest real-life wear history."
                                 )
 
-                                if summary.mostWorn.isEmpty {
-                                    emptyPanel(text: "Wear ranking will appear once more activity has been assigned.")
+                                if activeMostWorn(from: summary).isEmpty {
+                                    emptyPanel(text: "No active footwear has built up enough assigned wear yet.")
                                 } else {
-                                    ForEach(summary.mostWorn) { item in
+                                    ForEach(activeMostWorn(from: summary)) { item in
                                         insightRow(
                                             title: item.displayName,
                                             subtitle: item.category.replacingOccurrences(of: "_", with: " ").capitalized,
@@ -54,13 +54,13 @@ struct InsightsView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 WarmSectionHeader(
                                     title: "Needs attention",
-                                    detail: "Pairs showing signs that they may need a closer look soon."
+                                    detail: "Active pairs showing signs that they may need a closer look soon."
                                 )
 
-                                if summary.needsAttention.isEmpty {
-                                    emptyPanel(text: "Nothing is standing out as concerning right now.")
+                                if activeNeedsAttention(from: summary).isEmpty {
+                                    emptyPanel(text: "No active footwear is standing out as concerning right now.")
                                 } else {
-                                    ForEach(summary.needsAttention) { item in
+                                    ForEach(activeNeedsAttention(from: summary)) { item in
                                         insightRow(
                                             title: item.displayName,
                                             subtitle: "Worth a closer look",
@@ -74,18 +74,36 @@ struct InsightsView: View {
                             VStack(alignment: .leading, spacing: 16) {
                                 WarmSectionHeader(
                                     title: "Near retirement",
-                                    detail: "Pairs that may be approaching the end of their useful life."
+                                    detail: "Active pairs that may be approaching the end of their useful life."
                                 )
 
-                                if summary.nearRetirement.isEmpty {
-                                    emptyPanel(text: "Nothing looks close to retirement right now.")
+                                if activeNearRetirement(from: summary).isEmpty {
+                                    emptyPanel(text: "No active footwear looks close to retirement right now.")
                                 } else {
-                                    ForEach(summary.nearRetirement) { item in
+                                    ForEach(activeNearRetirement(from: summary)) { item in
                                         insightRow(
                                             title: item.displayName,
                                             subtitle: "Approaching end of life",
                                             tone: .red,
                                             detail: item.lifecycleSummary.map { SoftUtilityRiskTone.longLabel(for: $0.retirementRiskLevel) } ?? "May be nearing end of life"
+                                        )
+                                    }
+                                }
+                            }
+
+                            if !inactiveItems(from: summary).isEmpty {
+                                VStack(alignment: .leading, spacing: 16) {
+                                    WarmSectionHeader(
+                                        title: "Inactive history",
+                                        detail: "Retired and archived footwear kept in the record, but not part of the active story."
+                                    )
+
+                                    ForEach(inactiveItems(from: summary)) { item in
+                                        insightRow(
+                                            title: item.displayName,
+                                            subtitle: item.status.capitalized,
+                                            tone: .gray,
+                                            detail: inactiveDetailCopy(for: item.status)
                                         )
                                     }
                                 }
@@ -126,6 +144,37 @@ struct InsightsView: View {
         }
     }
 
+    private func activeMostWorn(from summary: InsightSummary) -> [FootwearItem] {
+        summary.mostWorn.filter { $0.status == "active" }
+    }
+
+    private func activeNeedsAttention(from summary: InsightSummary) -> [FootwearItem] {
+        summary.needsAttention.filter { $0.status == "active" }
+    }
+
+    private func activeNearRetirement(from summary: InsightSummary) -> [FootwearItem] {
+        summary.nearRetirement.filter { $0.status == "active" }
+    }
+
+    private func inactiveItems(from summary: InsightSummary) -> [FootwearItem] {
+        let combined = summary.mostWorn + summary.needsAttention + summary.nearRetirement
+        var seen = Set<String>()
+        return combined.filter { item in
+            guard item.status != "active" else { return false }
+            if seen.contains(item.id) { return false }
+            seen.insert(item.id)
+            return true
+        }
+    }
+
+    private func inactiveDetailCopy(for status: String) -> String {
+        switch status {
+        case "archived": return "Archived footwear remains in the record for reference only."
+        case "retired": return "Retired footwear remains in the record but is no longer part of the active rotation."
+        default: return "Inactive footwear."
+        }
+    }
+
     private func insightsHero(summary: InsightSummary) -> some View {
         WarmHeroCard {
             Text("Insights")
@@ -136,8 +185,8 @@ struct InsightsView: View {
                 .foregroundColor(Color.white.opacity(0.76))
 
             HStack(spacing: 12) {
-                WarmHeroStat(value: "\(summary.mostWorn.count)", label: "most worn")
-                WarmHeroStat(value: "\(summary.nearRetirement.count)", label: "near retirement")
+                WarmHeroStat(value: "\(activeMostWorn(from: summary).count)", label: "most worn")
+                WarmHeroStat(value: "\(activeNearRetirement(from: summary).count)", label: "near retirement")
             }
         }
     }
