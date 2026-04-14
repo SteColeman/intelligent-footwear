@@ -7,4 +7,5 @@ struct UpdateFootwearRequest: Codable {
     let nickname: String?
     let category: String
     let isDefaultFallback: Bool?
+    let status: String?
 }

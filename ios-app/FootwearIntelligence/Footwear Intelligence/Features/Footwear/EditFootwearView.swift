@@ -45,6 +45,22 @@ struct EditFootwearView: View {
                     }
                     .elevatedPanelStyle()
 
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Status")
+                            .font(.headline)
+                        Picker("Status", selection: $viewModel.status) {
+                            ForEach(viewModel.statuses, id: \.self) { status in
+                                Text(status.capitalized).tag(status)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+
+                        Text(statusCopy)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .softPanelStyle()
+
                     if let error = viewModel.errorMessage {
                         Text(error)
                             .foregroundColor(.red)
@@ -76,6 +92,17 @@ struct EditFootwearView: View {
                     .disabled(viewModel.isSaving)
                 }
             }
+        }
+    }
+
+    private var statusCopy: String {
+        switch viewModel.status {
+        case "archived":
+            return "Archived footwear stays in your history but no longer belongs in the active rotation."
+        case "retired":
+            return "Retired footwear remains part of the record, but is understood as no longer in regular use."
+        default:
+            return "Active footwear remains part of the live rotation and assignment logic."
         }
     }
 }

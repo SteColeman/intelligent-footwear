@@ -31,6 +31,7 @@ const updateFootwearSchema = z.object({
   nickname: z.string().nullable().optional(),
   category: z.string().min(1),
   isDefaultFallback: z.boolean().optional(),
+  status: z.enum(['active', 'retired', 'archived']).optional(),
 });
 
 async function attachLifecycleSummary<T extends { id: string }>(items: T[]) {
@@ -137,6 +138,7 @@ export async function footwearRoutes(app: FastifyInstance) {
         nickname: body.nickname ?? null,
         category: body.category,
         isDefaultFallback: body.isDefaultFallback ?? item.isDefaultFallback,
+        status: body.status ?? item.status,
       },
     });
 

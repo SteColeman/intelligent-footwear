@@ -8,6 +8,7 @@ final class EditFootwearViewModel: ObservableObject {
     @Published var nickname: String
     @Published var category: String
     @Published var isDefaultFallback: Bool
+    @Published var status: String
     @Published var isSaving = false
     @Published var errorMessage: String?
     @Published var didSave = false
@@ -21,12 +22,15 @@ final class EditFootwearViewModel: ObservableObject {
         "other"
     ]
 
+    let statuses = ["active", "retired", "archived"]
+
     init(item: FootwearItem) {
         self.brand = item.brand
         self.model = item.model
         self.nickname = item.nickname ?? ""
         self.category = item.category
         self.isDefaultFallback = item.isDefaultFallback
+        self.status = item.status
     }
 
     func save(userId: String, footwearItemId: String) async {
@@ -46,7 +50,8 @@ final class EditFootwearViewModel: ObservableObject {
                 model: model,
                 nickname: nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : nickname.trimmingCharacters(in: .whitespacesAndNewlines),
                 category: category,
-                isDefaultFallback: isDefaultFallback
+                isDefaultFallback: isDefaultFallback,
+                status: status
             )
 
             _ = try await APIClient.shared.updateFootwear(
