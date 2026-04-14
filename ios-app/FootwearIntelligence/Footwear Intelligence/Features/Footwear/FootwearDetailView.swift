@@ -32,8 +32,10 @@ struct FootwearDetailView: View {
                     }
                 }
 
-                Button("Log condition") {
-                    showingConditionCheckIn = true
+                if viewModel.item?.status == "active" {
+                    Button("Log condition") {
+                        showingConditionCheckIn = true
+                    }
                 }
             }
         }
@@ -92,6 +94,7 @@ struct FootwearDetailView: View {
         } else if let item = viewModel.item, let lifecycle = item.lifecycleSummary {
             VStack(alignment: .leading, spacing: 28) {
                 objectHero(for: item, lifecycle: lifecycle)
+                statusContextSection(item: item)
                 photoManagementSection(item: item, userId: userId)
                 sculptedMetricsSection(lifecycle: lifecycle)
                 lifecycleReadSection(lifecycle: lifecycle)
@@ -102,6 +105,7 @@ struct FootwearDetailView: View {
         } else if let item = viewModel.item {
             VStack(alignment: .leading, spacing: 24) {
                 objectHeroWithoutLifecycle(for: item)
+                statusContextSection(item: item)
                 photoManagementSection(item: item, userId: userId)
 
                 Text("No lifecycle data has been built for this footwear yet.")
@@ -234,6 +238,22 @@ struct FootwearDetailView: View {
         }
     }
 
+    private func statusContextSection(item: FootwearItem) -> some View {
+        WarmSurfaceCard {
+            HStack(alignment: .top, spacing: 14) {
+                statusIcon(for: item.status)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(statusHeadline(for: item.status))
+                        .font(.headline)
+                    Text(statusDescription(for: item.status, isDefaultFallback: item.isDefaultFallback))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+    }
+
     private func photoManagementSection(item: FootwearItem, userId: String) -> some View {
         WarmSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
@@ -296,6 +316,7 @@ struct FootwearDetailView: View {
                 }
             }
         }
+        .opacity(item.status == "active" ? 1 : 0.92)
     }
 
     private func heroImageBlock(for item: FootwearItem) -> some View {
@@ -427,7 +448,7 @@ struct FootwearDetailView: View {
 
     private var conditionHistorySection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            WarmSectionHeader(title: "Condition history", detail: "Snapshots of how the object actually felt over time.")
+            WarmSectionHeader(title: "Condition history", detail: viewModel.item?.status == "active" ? "Snapshots of how the object actually felt over time." : "Historical condition entries for this no-longer-active footwear.")
 
             if !viewModel.hasConditionHistory {
                 Text("Condition check-ins will appear here once you start logging them.")
@@ -470,6 +491,37 @@ struct FootwearDetailView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func statusIcon(for status: String) -> some View {
+        let config: (String, Color) = {
+            switch status {
+            case "archived": return ("archivebox.fill", .gray)
+            case "retired": return ("flag.fill", .orange)
+            default: return ("checkmark.circle.fill", .green)
+            }
+        }()
+
+        return WarmIconTile(systemName: config.0, tint: config.1.opacity(0.18), size: 50)
+    }
+
+    private func statusHeadline(for status: String) -> String {
+        switch status {
+        case "archived": return "Archived in the record"
+        case "retired": return "Retired from regular use"
+        default: return "Currently active"
+        }
+    }
+
+    private func statusDescription(for status: String, isDefaultFallback: Bool) -> String {
+        switch status {
+        case "archived":
+            return "This footwear is kept for reference, but it should not behave like part of the live rotation."
+        case "retired":
+            return "This footwear stays in the history, but it is no longer treated as part of regular active use."
+        default:
+            return isDefaultFallback ? "This pair is active and currently set as the default fallback footwear." : "This pair is active and part of the live rotation."
         }
     }
 
