@@ -219,40 +219,64 @@ struct FootwearDetailView: View {
 
     private func photoManagementSection(item: FootwearItem, userId: String) -> some View {
         WarmSurfaceCard {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Primary photo")
-                        .font(.headline)
-                    Text("Change the image used to represent this footwear across the app.")
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Primary photo")
+                            .font(.headline)
+                        Text("Change the image used to represent this footwear across the app.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    if isUpdatingPhoto {
+                        Text("Updating")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.orange.opacity(0.14))
+                            .foregroundColor(.orange)
+                            .clipShape(Capsule())
+                    }
+                }
+
+                HStack(spacing: 12) {
+                    PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
+                        Text(item.photoUrl == nil ? "Choose photo" : "Change photo")
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color(.tertiarySystemGroupedBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    }
+                    .disabled(isUpdatingPhoto)
+
+                    if item.photoUrl != nil {
+                        Button {
+                            Task {
+                                await clearPhoto(userId: userId)
+                            }
+                        } label: {
+                            Text("Remove")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red.opacity(0.10))
+                                .foregroundColor(.red)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        }
+                        .disabled(isUpdatingPhoto)
+                    }
+                }
+
+                if let photoUpdateError {
+                    Text(photoUpdateError)
+                        .foregroundColor(.red)
+                } else {
+                    Text(item.photoUrl == nil ? "No primary photo yet." : "This image is used as the visual identity for this pair.")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
-
-                Spacer()
-            }
-
-            PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                Text(isUpdatingPhoto ? "Updating..." : (item.photoUrl == nil ? "Choose photo" : "Change photo"))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color(.tertiarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            }
-            .disabled(isUpdatingPhoto)
-
-            if item.photoUrl != nil {
-                Button("Remove photo") {
-                    Task {
-                        await clearPhoto(userId: userId)
-                    }
-                }
-                .foregroundColor(.red)
-                .disabled(isUpdatingPhoto)
-            }
-
-            if let photoUpdateError {
-                Text(photoUpdateError)
-                    .foregroundColor(.red)
             }
         }
     }
