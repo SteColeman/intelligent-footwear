@@ -92,6 +92,21 @@ final class APIClient {
         return try JSONDecoder.apiDecoder.decode(FootwearItem.self, from: data)
     }
 
+    func updateFootwear(userId: String, footwearItemId: String, payload: UpdateFootwearRequest) async throws -> FootwearItem {
+        let url = baseURL
+            .appendingPathComponent("footwear")
+            .appendingPathComponent(footwearItemId)
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(payload)
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        try validate(response: response, data: data)
+        return try JSONDecoder.apiDecoder.decode(FootwearItem.self, from: data)
+    }
+
     func updateFootwearPhoto(userId: String, footwearItemId: String, photoUrl: String?) async throws -> FootwearItem {
         let url = baseURL
             .appendingPathComponent("footwear")

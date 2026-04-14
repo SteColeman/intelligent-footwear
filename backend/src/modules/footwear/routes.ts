@@ -24,6 +24,15 @@ const updateFootwearPhotoSchema = z.object({
   photoUrl: z.string().nullable().optional(),
 });
 
+const updateFootwearSchema = z.object({
+  userId: z.string(),
+  brand: z.string().min(1),
+  model: z.string().min(1),
+  nickname: z.string().nullable().optional(),
+  category: z.string().min(1),
+  isDefaultFallback: z.boolean().optional(),
+});
+
 async function attachLifecycleSummary<T extends { id: string }>(items: T[]) {
   if (items.length === 0) {
     return [];
@@ -98,6 +107,40 @@ export async function footwearRoutes(app: FastifyInstance) {
 
     await recomputeLifecycleSummary(created.id);
     const [itemWithSummary] = await attachLifecycleSummary([created]);
+    return itemWithSummary;
+  });
+
+  app.patch('/footwear/:id', async request => {
+    const params = z.object({ id: z.string() }).parse(request.params);
+    const body = updateFootwearSchema.parse(request.body);
+
+    const item = await prisma.footwearItem.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!item || item.userId !== body.userId) {
+      throw new AppError('Footwear item not found for user', 404);
+    }
+
+    if (body.isDefaultFallback) {
+      await prisma.footwearItem.updateMany({
+        where: { userId: body.userId, isDefaultFallback: true },
+        data: { isDefaultFallback: false },
+      });
+    }
+
+    const updated = await prisma.footwearItem.update({
+      where: { id: params.id },
+      data: {
+        brand: body.brand,
+        model: body.model,
+        nickname: body.nickname ?? null,
+        category: body.category,
+        isDefaultFallback: body.isDefaultFallback ?? item.isDefaultFallback,
+      },
+    });
+
+    const [itemWithSummary] = await attachLifecycleSummary([updated]);
     return itemWithSummary;
   });
 

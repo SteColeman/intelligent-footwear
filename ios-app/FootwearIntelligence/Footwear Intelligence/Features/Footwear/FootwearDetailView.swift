@@ -10,6 +10,7 @@ struct FootwearDetailView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isUpdatingPhoto = false
     @State private var photoUpdateError: String?
+    @State private var editingItem: FootwearItem?
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -25,6 +26,12 @@ struct FootwearDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if session.userId != nil {
+                Button("Edit") {
+                    if let item = viewModel.item {
+                        editingItem = item
+                    }
+                }
+
                 Button("Log condition") {
                     showingConditionCheckIn = true
                 }
@@ -38,6 +45,16 @@ struct FootwearDetailView: View {
             }
         }) {
             ConditionCheckInView(footwearItemId: footwearItemId)
+                .environmentObject(session)
+        }
+        .sheet(item: $editingItem, onDismiss: {
+            Task {
+                if let userId = session.userId {
+                    await viewModel.load(footwearItemId: footwearItemId, userId: userId)
+                }
+            }
+        }) { item in
+            EditFootwearView(item: item)
                 .environmentObject(session)
         }
         .task(id: session.userId) {
