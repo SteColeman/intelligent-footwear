@@ -1,7 +1,7 @@
 # Prototype Sanity Checklist
 
 ## Goal
-Use this checklist to validate the current connected prototype honestly on Mac / Xcode / device, especially after the newer onboarding persistence, warm-UI, and footwear photo work.
+Use this checklist to validate the current connected prototype honestly on Mac / Xcode / device, especially after the newer onboarding persistence, warm-UI, footwear photo work, and lifecycle-state management.
 
 See also:
 - `HANDOFF_READINESS.md`
@@ -20,6 +20,7 @@ See also:
 - [ ] `/me?authProviderId=demo-user` returns live user
 - [ ] `POST /me/onboarding-complete` route confirmed live
 - [ ] `PATCH /footwear/:id/photo` route confirmed live
+- [ ] `PATCH /footwear/:id` route confirmed live
 
 ## iOS / Xcode sanity
 - [x] checked-in Xcode project exists
@@ -27,6 +28,7 @@ See also:
 - [ ] app launches successfully in simulator or device
 - [ ] backend base URL reachable from simulator/device
 - [ ] new `Core/Photos/FootwearPhotoStore.swift` is included in target membership
+- [ ] new `Core/UI/FootwearPhotoView.swift` is included in target membership
 - [ ] PhotosUI additions compile cleanly
 
 ## Core flow sanity
@@ -36,14 +38,20 @@ See also:
 - [ ] Apple Health step behaves sensibly (connect or skip)
 - [ ] add first footwear works
 - [ ] add second footwear works
-- [ ] changing default footwear behaves correctly
+- [ ] editing footwear metadata works
+- [ ] changing default footwear works
+- [ ] changing status to retired works
+- [ ] changing status to archived works
+- [ ] returning archived/retired footwear to active works
+- [ ] default footwear behavior remains sane after status changes
 - [ ] import demo data works
 - [ ] repeated import does not create obviously broken state
 - [ ] unassigned wear appears when expected
 - [ ] assignment works
+- [ ] only active footwear appears in normal assignment targets
 - [ ] repeated assign/list/detail refresh stays sane
-- [ ] condition log works
-- [ ] repeated condition logging stays sane
+- [ ] condition log works for active footwear
+- [ ] inactive footwear is not treated like active footwear in the UI
 
 ## Photo feature sanity
 - [ ] create footwear with no photo works
@@ -56,13 +64,16 @@ See also:
 - [ ] remove photo from detail works
 - [ ] relaunch app and photo still appears correctly
 - [ ] missing/bad image fallback is acceptable
+- [ ] photo survives metadata/status edits
 
 ## Home / Insights sanity
 - [ ] Home loads after onboarding and footwear creation
-- [ ] rotation cards make sense after multiple footwear items
-- [ ] default footwear appears correctly in Home
+- [ ] Home rotation shows only active footwear
+- [ ] inactive footwear does not muddy active rotation copy
+- [ ] default footwear copy stays sane if the default pair becomes inactive
 - [ ] Insights loads after import/assignment
-- [ ] richer warm UI still behaves cleanly with real data
+- [ ] primary insight sections focus on active footwear
+- [ ] inactive footwear appears only in intentional historical treatment
 
 ## Known current blockers
 - no Docker/PostgreSQL runtime in current Linux environment
