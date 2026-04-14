@@ -27,6 +27,33 @@ curl -X POST http://localhost:3000/footwear \
 curl "http://localhost:3000/footwear?userId=USER_ID_HERE"
 ```
 
+Update metadata / lifecycle state:
+
+```bash
+curl -X PATCH http://localhost:3000/footwear/FOOTWEAR_ID_HERE \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "USER_ID_HERE",
+    "brand": "New Balance",
+    "model": "990v6",
+    "nickname": "Daily Pair",
+    "category": "trainers",
+    "isDefaultFallback": true,
+    "status": "active"
+  }'
+```
+
+Change photo:
+
+```bash
+curl -X PATCH http://localhost:3000/footwear/FOOTWEAR_ID_HERE/photo \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "USER_ID_HERE",
+    "photoUrl": "file:///tmp/example-photo.jpg"
+  }'
+```
+
 ```bash
 curl -X POST http://localhost:3000/health/import-batch \
   -H "Content-Type: application/json" \
@@ -95,3 +122,24 @@ curl "http://localhost:3000/footwear/FOOTWEAR_ID_HERE/lifecycle-summary?userId=U
 curl "http://localhost:3000/home-summary?userId=USER_ID_HERE"
 curl "http://localhost:3000/insights?userId=USER_ID_HERE"
 ```
+
+Status/default regression spot-check:
+
+```bash
+curl -X PATCH http://localhost:3000/footwear/FOOTWEAR_ID_HERE \
+  -H "Content-Type: application/json" \
+  -d '{
+    "userId": "USER_ID_HERE",
+    "brand": "New Balance",
+    "model": "990v6",
+    "nickname": "Retired Pair",
+    "category": "trainers",
+    "isDefaultFallback": true,
+    "status": "retired"
+  }'
+```
+
+Expected current behavior:
+- response should return the item as `retired`
+- `isDefaultFallback` should resolve to `false`
+- `GET /home-summary` should no longer treat it as current active default footwear

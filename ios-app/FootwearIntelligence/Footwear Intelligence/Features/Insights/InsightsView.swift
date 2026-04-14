@@ -157,14 +157,7 @@ struct InsightsView: View {
     }
 
     private func inactiveItems(from summary: InsightSummary) -> [FootwearItem] {
-        let combined = summary.mostWorn + summary.needsAttention + summary.nearRetirement
-        var seen = Set<String>()
-        return combined.filter { item in
-            guard item.status != "active" else { return false }
-            if seen.contains(item.id) { return false }
-            seen.insert(item.id)
-            return true
-        }
+        summary.inactiveHistory
     }
 
     private func inactiveDetailCopy(for status: String) -> String {

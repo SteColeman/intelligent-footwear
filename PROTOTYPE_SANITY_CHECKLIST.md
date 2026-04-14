@@ -51,6 +51,8 @@ See also:
 - [ ] only active footwear appears in normal assignment targets
 - [ ] repeated assign/list/detail refresh stays sane
 - [ ] condition log works for active footwear
+- [ ] condition log still works for retired footwear if intended
+- [ ] archived footwear cannot create fresh condition logs
 - [ ] inactive footwear is not treated like active footwear in the UI
 
 ## Photo feature sanity
@@ -72,6 +74,7 @@ See also:
 - [ ] inactive footwear does not muddy active rotation copy
 - [ ] default footwear copy stays sane if the default pair becomes inactive
 - [ ] Insights loads after import/assignment
+- [ ] backend insights payload returns active primary sections and explicit inactive history
 - [ ] primary insight sections focus on active footwear
 - [ ] inactive footwear appears only in intentional historical treatment
 

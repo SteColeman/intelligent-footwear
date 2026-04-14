@@ -30,6 +30,8 @@ Use this checklist once the app is installed on a physical iPhone and the backen
 - [ ] import demo or live activity works
 - [ ] assign flow works
 - [ ] condition log works for active footwear
+- [ ] condition log still works for retired footwear if intended
+- [ ] archived footwear cannot create fresh condition logs
 - [ ] inactive footwear is not treated like active footwear in the main UI
 
 ## Relaunch / persistence

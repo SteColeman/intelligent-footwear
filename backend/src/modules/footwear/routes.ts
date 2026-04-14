@@ -130,6 +130,11 @@ export async function footwearRoutes(app: FastifyInstance) {
       });
     }
 
+    const resolvedStatus = body.status ?? item.status;
+    const resolvedDefault = resolvedStatus === 'active'
+      ? (body.isDefaultFallback ?? item.isDefaultFallback)
+      : false;
+
     const updated = await prisma.footwearItem.update({
       where: { id: params.id },
       data: {
@@ -137,8 +142,8 @@ export async function footwearRoutes(app: FastifyInstance) {
         model: body.model,
         nickname: body.nickname ?? null,
         category: body.category,
-        isDefaultFallback: body.isDefaultFallback ?? item.isDefaultFallback,
-        status: body.status ?? item.status,
+        isDefaultFallback: resolvedDefault,
+        status: resolvedStatus,
       },
     });
 

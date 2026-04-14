@@ -58,6 +58,12 @@ struct EditFootwearView: View {
                         Text(statusCopy)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
+
+                        if viewModel.status != "active" && viewModel.isDefaultFallback {
+                            Text("Inactive footwear cannot remain the default. Saving will clear that automatically.")
+                                .font(.subheadline)
+                                .foregroundColor(.orange)
+                        }
                     }
                     .softPanelStyle()
 

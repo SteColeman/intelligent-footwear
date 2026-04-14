@@ -86,6 +86,8 @@ Validation failures return:
 - `POST /dev/bootstrap-demo-user`
 - `GET /footwear?userId=...`
 - `POST /footwear`
+- `PATCH /footwear/:id`
+- `PATCH /footwear/:id/photo`
 - `GET /footwear/:id?userId=...`
 - `POST /health/import-batch`
 - `GET /wear-events/unassigned?userId=...`
@@ -101,13 +103,23 @@ Validation failures return:
 ## Current milestone
 Prototype backend supports:
 - demo-user bootstrapping
+- onboarding persistence updates
+- health connection persistence updates
 - footwear CRUD
+- editable footwear metadata
+- editable footwear lifecycle state
+- editable primary footwear photo
 - health import
 - assignment
 - condition logs
 - lifecycle summaries
 - home/insights summaries
 - partial execution validation
+
+## Current product-rule note
+- only active footwear should behave as active rotation/default footwear
+- changing footwear to `retired` or `archived` now clears default fallback automatically
+- inactive footwear should remain visible historically, not behave like live rotation pairs
 
 ## Current honest status
 - dependencies install cleanly

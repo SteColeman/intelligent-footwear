@@ -46,8 +46,10 @@ See also:
 21. Change primary photo from detail
 22. Remove primary photo from detail
 23. Log condition on active footwear
-24. Refresh Home and Insights
-25. Relaunch app again and check:
+24. Change one pair to retired and confirm condition logging still behaves as intended
+25. Change one pair to archived and confirm fresh condition logging is no longer offered
+26. Refresh Home and Insights
+27. Relaunch app again and check:
     - onboarding still stays complete
     - photo state still renders correctly
     - active/inactive state still renders correctly

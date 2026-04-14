@@ -59,14 +59,18 @@ Check:
 - [ ] Insights can include it again if data warrants
 - [ ] Assign can offer it again
 - [ ] Detail restores active affordances (e.g. condition logging)
+- [ ] Archived footwear does not offer new condition logging
+- [ ] Retired footwear can still accept historical condition logging if intended
 
 ### 4. Default pair → Retired/Archived
 Expected:
-- app should not quietly treat inactive footwear as the active default without clear handling
+- inactive footwear should automatically stop being the default fallback
+- app should not quietly treat inactive footwear as the active default
 - Home/default messaging should remain honest
 - assignment/default behavior should remain sane
 
 Check:
+- [ ] Inactive footwear is automatically cleared as default during status change
 - [ ] Home no longer presents inactive default as if it were live default footwear
 - [ ] Assign/default behavior remains sane
 - [ ] Edit flow remains consistent after transition
@@ -111,6 +115,7 @@ These are the combinations most likely to expose inconsistencies:
 - [ ] create two pairs → switch default → retire one → assign wear
 - [ ] add photo → relaunch → change status → relaunch again
 - [ ] retire pair with history → inspect Insights/Home/List/Detail consistency
+- [ ] inactive items do not leak back into active insights sections after repeated edits/reloads
 - [ ] unarchive/reactivate pair → confirm it returns to active behavior everywhere
 
 ## Honest note

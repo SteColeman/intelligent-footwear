@@ -31,7 +31,10 @@ This is still a **connected prototype**, not a fully validated MVP.
 - repeated import/dedupe behavior against realistic data
 - multiple-footwear rotation behavior under repeated use
 - default footwear behavior under repeated assignment flows
+- automatic clearing of default fallback when footwear becomes inactive
 - editable photo flows over repeated sessions on device
+- retired vs archived condition-log behavior over repeated sessions
+- active/inactive insights separation after repeated status transitions and reloads
 - real Apple Health data path beyond happy-path validation
 - full DB-backed validation from this Linux workspace
 

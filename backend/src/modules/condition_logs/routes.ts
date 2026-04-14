@@ -28,6 +28,10 @@ export async function conditionLogRoutes(app: FastifyInstance) {
       throw new AppError('Footwear item not found for user', 404);
     }
 
+    if (footwear.status === 'archived') {
+      throw new AppError('Archived footwear cannot accept new condition logs', 400);
+    }
+
     const log = await prisma.conditionLog.create({
       data: {
         userId: body.userId,

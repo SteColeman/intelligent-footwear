@@ -39,6 +39,10 @@ struct CreateFootwearView: View {
                         }
 
                         Toggle("Use as default footwear", isOn: $viewModel.isDefaultFallback)
+
+                        Text("Default footwear is the active fallback pair used when movement needs somewhere predictable to land.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
                     }
                     .elevatedPanelStyle()
 

@@ -32,7 +32,7 @@ struct FootwearDetailView: View {
                     }
                 }
 
-                if viewModel.item?.status == "active" {
+                if viewModel.item?.status != "archived" {
                     Button("Log condition") {
                         showingConditionCheckIn = true
                     }
@@ -517,9 +517,9 @@ struct FootwearDetailView: View {
     private func statusDescription(for status: String, isDefaultFallback: Bool) -> String {
         switch status {
         case "archived":
-            return "This footwear is kept for reference, but it should not behave like part of the live rotation."
+            return "This footwear is kept for reference only. It stays visible historically, but it should not behave like part of the live rotation or accept fresh condition updates."
         case "retired":
-            return "This footwear stays in the history, but it is no longer treated as part of regular active use."
+            return "This footwear stays in the record as past use. It is no longer part of regular active rotation, but you can still log how it is holding up if needed."
         default:
             return isDefaultFallback ? "This pair is active and currently set as the default fallback footwear." : "This pair is active and part of the live rotation."
         }

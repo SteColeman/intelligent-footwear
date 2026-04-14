@@ -102,6 +102,8 @@ export async function insightRoutes(app: FastifyInstance) {
     const footwear = await prisma.footwearItem.findMany({
       where: { userId: query.userId },
     });
+    const activeFootwear = footwear.filter(item => item.status === 'active');
+    const inactiveFootwear = footwear.filter(item => item.status !== 'active');
 
     const lifecycleSummaries = await prisma.lifecycleSummary.findMany({
       where: { footwearItemId: { in: footwear.map(f => f.id) } },
@@ -132,21 +134,28 @@ export async function insightRoutes(app: FastifyInstance) {
     }
 
     const mostWorn = withLifecycleSummaries(
-      [...footwear]
+      [...activeFootwear]
         .sort((a, b) => (summaryMap.get(b.id)?.totalSteps ?? 0) - (summaryMap.get(a.id)?.totalSteps ?? 0))
         .slice(0, 5),
       summaryMap,
     );
 
     const needsAttention = withLifecycleSummaries(
-      [...footwear]
+      [...activeFootwear]
         .sort((a, b) => (latestConditionMap.get(a.id) ?? 999) - (latestConditionMap.get(b.id) ?? 999))
         .slice(0, 5),
       summaryMap,
     );
 
     const nearRetirement = withLifecycleSummaries(
-      footwear.filter(f => summaryMap.get(f.id)?.retirementRiskLevel === 'high'),
+      activeFootwear.filter(f => summaryMap.get(f.id)?.retirementRiskLevel === 'high'),
+      summaryMap,
+    );
+
+    const inactiveHistory = withLifecycleSummaries(
+      [...inactiveFootwear]
+        .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+        .slice(0, 10),
       summaryMap,
     );
 
@@ -154,6 +163,7 @@ export async function insightRoutes(app: FastifyInstance) {
       mostWorn,
       needsAttention,
       nearRetirement,
+      inactiveHistory,
     };
   });
 }
