@@ -23,13 +23,26 @@ struct FootwearListView: View {
                                         .frame(maxWidth: .infinity, alignment: .center)
                                         .padding(.top, 24)
                                 } else if !viewModel.items.isEmpty {
-                                    WarmSectionHeader(
-                                        title: "Your rotation",
-                                        detail: "A calmer object view of the footwear currently carrying your days."
-                                    )
+                                    if !activeItems.isEmpty {
+                                        WarmSectionHeader(
+                                            title: "Active rotation",
+                                            detail: "The footwear currently carrying your days."
+                                        )
 
-                                    ForEach(viewModel.items) { item in
-                                        footwearCard(item: item)
+                                        ForEach(activeItems) { item in
+                                            footwearCard(item: item, subdued: false)
+                                        }
+                                    }
+
+                                    if !inactiveItems.isEmpty {
+                                        WarmSectionHeader(
+                                            title: "Archived and retired",
+                                            detail: "Footwear kept in the record, but no longer part of the active rotation."
+                                        )
+
+                                        ForEach(inactiveItems) { item in
+                                            footwearCard(item: item, subdued: true)
+                                        }
                                     }
                                 } else if let error = viewModel.errorMessage {
                                     VStack(alignment: .leading, spacing: 10) {
@@ -87,6 +100,14 @@ struct FootwearListView: View {
         }
     }
 
+    private var activeItems: [FootwearItem] {
+        viewModel.items.filter { $0.status == "active" }
+    }
+
+    private var inactiveItems: [FootwearItem] {
+        viewModel.items.filter { $0.status != "active" }
+    }
+
     private var listHero: some View {
         WarmHeroCard {
             Text("Footwear")
@@ -97,18 +118,13 @@ struct FootwearListView: View {
                 .foregroundColor(Color.white.opacity(0.76))
 
             HStack(spacing: 12) {
-                WarmHeroStat(value: "\(viewModel.items.count)", label: "in rotation")
-                WarmHeroStat(value: defaultCountText, label: "default")
+                WarmHeroStat(value: "\(activeItems.count)", label: "active")
+                WarmHeroStat(value: "\(inactiveItems.count)", label: "inactive")
             }
         }
     }
 
-    private var defaultCountText: String {
-        let count = viewModel.items.filter { $0.isDefaultFallback }.count
-        return "\(count)"
-    }
-
-    private func footwearCard(item: FootwearItem) -> some View {
+    private func footwearCard(item: FootwearItem, subdued: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             NavigationLink {
                 FootwearDetailView(footwearItemId: item.id)
@@ -120,11 +136,12 @@ struct FootwearListView: View {
                             photoUrl: item.photoUrl,
                             size: 72,
                             cornerRadius: 22,
-                            tint: Color(red: 0.90, green: 0.89, blue: 0.81),
+                            tint: subdued ? Color(red: 0.86, green: 0.86, blue: 0.84) : Color(red: 0.90, green: 0.89, blue: 0.81),
                             iconFont: .title2,
                             progressTint: .secondary,
                             backgroundOpacity: 0.35
                         )
+                        .opacity(subdued ? 0.82 : 1)
 
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(alignment: .top) {
@@ -139,43 +156,76 @@ struct FootwearListView: View {
 
                                 Spacer()
 
-                                if item.isDefaultFallback {
-                                    Text("Default")
-                                        .font(.caption.weight(.semibold))
-                                        .padding(.horizontal, 10)
-                                        .padding(.vertical, 6)
-                                        .background(Color.green.opacity(0.15))
-                                        .foregroundColor(.green)
-                                        .clipShape(Capsule())
+                                HStack(spacing: 8) {
+                                    statusPill(for: item.status)
+
+                                    if item.isDefaultFallback {
+                                        Text("Default")
+                                            .font(.caption.weight(.semibold))
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Color.green.opacity(0.15))
+                                            .foregroundColor(.green)
+                                            .clipShape(Capsule())
+                                    }
                                 }
                             }
 
                             if let lifecycle = item.lifecycleSummary {
                                 HStack(spacing: 12) {
-                                    smallMetric(label: "Steps", value: "\(lifecycle.totalSteps)", tint: Color(red: 0.87, green: 0.90, blue: 0.82))
-                                    smallMetric(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm), tint: Color(red: 0.93, green: 0.87, blue: 0.78))
+                                    smallMetric(label: "Steps", value: "\(lifecycle.totalSteps)", tint: subdued ? Color(red: 0.90, green: 0.90, blue: 0.88) : Color(red: 0.87, green: 0.90, blue: 0.82))
+                                    smallMetric(label: "Distance", value: String(format: "%.1f km", lifecycle.totalDistanceKm), tint: subdued ? Color(red: 0.92, green: 0.91, blue: 0.89) : Color(red: 0.93, green: 0.87, blue: 0.78))
                                 }
 
-                                Text(SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel))
+                                Text(item.status == "active" ? SoftUtilityRiskTone.shortLabel(for: lifecycle.retirementRiskLevel) : inactiveStatusCopy(for: item.status))
                                     .font(.subheadline.weight(.medium))
-                                    .foregroundColor(SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel))
+                                    .foregroundColor(item.status == "active" ? SoftUtilityRiskTone.color(for: lifecycle.retirementRiskLevel) : .secondary)
                             } else {
-                                Text("No wear has been assigned to this footwear yet.")
+                                Text(item.status == "active" ? "No wear has been assigned to this footwear yet." : inactiveStatusCopy(for: item.status))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
                         }
                     }
                 }
+                .opacity(subdued ? 0.88 : 1)
             }
             .buttonStyle(.plain)
 
-            Button {
-                selectedForCheckIn = item
-            } label: {
-                Text("Log condition")
+            if item.status == "active" {
+                Button {
+                    selectedForCheckIn = item
+                } label: {
+                    Text("Log condition")
+                }
+                .font(.subheadline.weight(.medium))
             }
-            .font(.subheadline.weight(.medium))
+        }
+    }
+
+    private func statusPill(for status: String) -> some View {
+        let color: Color = {
+            switch status {
+            case "archived": return .gray
+            case "retired": return .orange
+            default: return .blue
+            }
+        }()
+
+        return Text(status.capitalized)
+            .font(.caption.weight(.semibold))
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(color.opacity(0.12))
+            .foregroundColor(color)
+            .clipShape(Capsule())
+    }
+
+    private func inactiveStatusCopy(for status: String) -> String {
+        switch status {
+        case "archived": return "Kept for reference, but removed from the active rotation."
+        case "retired": return "No longer in regular use, but still part of the history."
+        default: return "Inactive footwear."
         }
     }
 

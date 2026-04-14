@@ -68,6 +68,10 @@ struct HomeView: View {
         }
     }
 
+    private var activeFootwear: [FootwearItem] {
+        (viewModel.summary?.activeFootwear ?? []).filter { $0.status == "active" }
+    }
+
     private func flagshipHero(summary: HomeSummary) -> some View {
         WarmHeroCard {
             HStack(alignment: .top) {
@@ -95,11 +99,11 @@ struct HomeView: View {
 
             HStack(spacing: 14) {
                 WarmHeroStat(value: "\(summary.today.steps)", label: "steps")
-                WarmHeroStat(value: "\(summary.activeFootwear.count)", label: "active pairs")
+                WarmHeroStat(value: "\(activeFootwear.count)", label: "active pairs")
                 WarmHeroStat(value: "\(summary.unassignedWear.count)", label: "to review")
             }
 
-            if let currentDefault = summary.currentDefault {
+            if let currentDefault = summary.currentDefault, currentDefault.status == "active" {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Current default")
                         .font(.caption.weight(.semibold))
@@ -158,9 +162,12 @@ struct HomeView: View {
             .frame(maxWidth: .infinity, minHeight: 170, alignment: .topLeading)
 
             VStack(alignment: .leading, spacing: 14) {
-                WarmSectionHeader(title: "Default footwear", detail: summary.currentDefault?.displayName ?? "No fallback pair set yet")
+                WarmSectionHeader(
+                    title: "Default footwear",
+                    detail: (summary.currentDefault?.status == "active") ? (summary.currentDefault?.displayName ?? "No fallback pair set yet") : "No active fallback pair set"
+                )
 
-                Text(summary.currentDefault == nil ? "Pick one to make assignment behaviour more predictable." : "Used when you want movement to land somewhere stable.")
+                Text((summary.currentDefault == nil || summary.currentDefault?.status != "active") ? "Pick an active pair to make assignment behaviour more predictable." : "Used when you want movement to land somewhere stable.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -183,14 +190,14 @@ struct HomeView: View {
 
     private func rotationSection(summary: HomeSummary) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            WarmSectionHeader(title: "In rotation", detail: "The pairs currently carrying your walking life.")
+            WarmSectionHeader(title: "In rotation", detail: activeFootwear.isEmpty ? "No active footwear is currently in rotation." : "The pairs currently carrying your walking life.")
 
-            if summary.activeFootwear.isEmpty {
-                Text("Add footwear to start building a real rotation.")
+            if activeFootwear.isEmpty {
+                Text("Set at least one pair to active to build a real rotation.")
                     .foregroundColor(.secondary)
                     .softPanelStyle()
             } else {
-                ForEach(summary.activeFootwear) { item in
+                ForEach(activeFootwear) { item in
                     WarmSurfaceCard {
                         HStack(alignment: .top, spacing: 16) {
                             WarmIconTile(systemName: "shoeprints.fill", tint: Color(red: 0.92, green: 0.90, blue: 0.84), size: 62)
