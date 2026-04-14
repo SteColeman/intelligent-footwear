@@ -1,7 +1,7 @@
 # iOS Project Status
 
 ## Current state
-The iOS side now includes a **working checked-in Xcode project container** plus the structured SwiftUI source tree.
+The iOS side is now a **working checked-in Xcode project** with a substantially more real SwiftUI prototype than the earlier scaffold stage.
 
 ## What exists now
 - working `.xcodeproj` checked into the repo
@@ -16,18 +16,33 @@ The iOS side now includes a **working checked-in Xcode project container** plus 
 - footwear list → detail navigation path
 - condition-history loading path in footwear detail
 - cleaner assign/import/unassigned-wear flow structure
-- less scaffold-y app copy across the main screens
-- softer grouped-panel “Soft Utility” design pass across the main app surfaces
 - HealthKit query scaffolding
+- shared warm-surface UI primitives (`WarmHeroCard`, `WarmSurfaceCard`, `WarmSectionHeader`, `WarmHeroStat`, etc.)
+- stronger visual treatment across the main product surfaces
+- onboarding persistence path now writes back to backend instead of only local state
+- primary footwear photo support in the prototype:
+  - add photo during create flow
+  - local photo preview
+  - local photo persistence in app sandbox
+  - list/detail rendering
+  - change/remove photo from detail
 
 ## What still does not yet exist
 - proof of stable end-to-end runtime across repeated test passes
-- polished Xcode project layout
-- final cleaned canonical iOS folder structure
-- reusable shared styling layer for the new UI direction
+- final cleaned Xcode/project folder structure
+- true media upload/storage beyond local prototype persistence
+- fully hardened photo/runtime UX on real device across repeated sessions
+- fully completed runtime hardening for repeated onboarding/import/assign/detail cycles
 
 ## Honest interpretation
-This is no longer just a source-only Apple prototype. It has crossed into a buildable Xcode-backed prototype with a first real design-direction pass, but still needs runtime hardening and some repo/Xcode structure cleanup.
+This is well past a source-only Apple prototype. It is now a buildable Xcode-backed connected prototype with a materially stronger UI system, a working onboarding persistence path, and real object-identity features like editable footwear photos.
+
+It is still not a fully validated MVP.
 
 ## Immediate next target
-Keep validating the real runtime loop, then reduce ad hoc UI implementation by extracting the new design direction into reusable shared styling patterns.
+Keep validating the real runtime loop on Mac/device, especially:
+- repeated app relaunch behavior
+- onboarding persistence
+- photo add/change/remove behavior
+- list/detail consistency after image updates
+- import/assign/detail flows after repeated use
