@@ -31,7 +31,20 @@ npm run build
 npm run start
 ```
 
-That path is useful later for cleaner packaging/runtime validation once the database runtime is available.
+That path is useful for cleaner packaging/runtime validation and is the intended path for hosted deployment.
+
+## Hosted deployment note
+For a hosted environment, prefer:
+```bash
+npm install
+npm run prisma:generate
+npm run build
+npm run prisma:migrate:deploy
+npm run start
+```
+
+See also:
+- `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
 
 ## Demo user
 The prototype currently uses:

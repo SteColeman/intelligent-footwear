@@ -16,9 +16,9 @@ Use this when the project is pushed to GitHub and opened on a Mac.
 - [ ] confirm `/dev/bootstrap-demo-user` responds
 
 ## Xcode side
-- [ ] create or open `FootwearIntelligence` iOS app project
-- [ ] add the prototype Swift files from `mvp-build/ios-app/FootwearIntelligence/`
+- [ ] open checked-in `FootwearIntelligence` Xcode project
 - [ ] confirm all files are included in the app target
+- [ ] verify newer files are in target membership (`FootwearPhotoStore`, `FootwearPhotoView`, `UpdateFootwearRequest`, `EditFootwearViewModel`, `EditFootwearView`)
 - [ ] add HealthKit capability
 - [ ] add `NSHealthShareUsageDescription`
 - [ ] set backend URL if needed for simulator/device (`FOOTWEAR_BACKEND_URL` supported)

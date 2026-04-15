@@ -4,7 +4,10 @@
 Turn the current SwiftUI source tree into a runnable local iOS prototype in Xcode.
 
 ## Current state
-The source structure exists, but there is still **no checked-in `.xcodeproj` / target container** in this repo yet.
+A checked-in Xcode project now exists in the repo and has already had real Mac-side build/run work.
+
+Project container:
+- `ios-app/FootwearIntelligence/Footwear Intelligence.xcodeproj`
 
 See also:
 - `PROJECT_STATUS.md`
@@ -13,22 +16,17 @@ See also:
 
 ## Steps
 
-### 1. Create a new iOS app project in Xcode
-- App name: `FootwearIntelligence`
-- Interface: SwiftUI
-- Language: Swift
-- Use Core Data: No
-- Include Tests: optional for now
+### 1. Open the checked-in iOS app project in Xcode
+Open:
+- `ios-app/FootwearIntelligence/Footwear Intelligence.xcodeproj`
 
-### 2. Replace generated source with project source
-Use the files from:
-`mvp-build/ios-app/FootwearIntelligence/`
-
-Map them into the Xcode project groups:
-- App
-- Core
-- Features
-- Resources
+### 2. Verify source membership instead of rebuilding project structure
+Use the existing checked-in source tree and confirm newer files are included in the target, especially:
+- `Core/Photos/FootwearPhotoStore.swift`
+- `Core/UI/FootwearPhotoView.swift`
+- `Core/Models/UpdateFootwearRequest.swift`
+- `Core/ViewModels/EditFootwearViewModel.swift`
+- `Features/Footwear/EditFootwearView.swift`
 
 ### 3. Add HealthKit capability
 In Signing & Capabilities:
@@ -48,7 +46,14 @@ Default prototype backend URL:
 The app also supports an environment override:
 - `FOOTWEAR_BACKEND_URL`
 
-Use that if simulator/device networking requires a different host.
+Use that for:
+- Mac simulator pointing at LAN/hosted backend
+- physical iPhone pointing at hosted backend
+
+For hosted-device testing, prefer a real hosted URL instead of LAN-only assumptions.
+See also:
+- `../HOSTED_RUNTIME_SWITCHOVER_CHECKLIST.md`
+- `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
 
 ### 6. Run backend first
 Use the backend README instructions before launching the app.
