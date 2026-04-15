@@ -54,7 +54,7 @@ The prototype is materially more real than the old docs suggest:
 What is still missing is **repeatable runtime hardening**, not basic project existence.
 
 ## Nearest real milestone
-- prepare hosted backend deployment path
+- execute `GO_LIVE_CHECKLIST.md`
 - connect backend to hosted Postgres
 - validate repeated relaunch/onboarding behavior
 - validate repeated photo add/change/remove behavior

@@ -72,3 +72,6 @@ This project does not need a fancy platform decision yet. It needs the fastest p
 
 ## Honest note
 This project is still a connected MVP prototype. Hosted deployment is about making it testable on a real phone with a real reachable backend, not pretending it is already production-grade infrastructure.
+
+For the shortest operator path, use:
+- `GO_LIVE_CHECKLIST.md`

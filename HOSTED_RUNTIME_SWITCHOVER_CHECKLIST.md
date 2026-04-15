@@ -32,3 +32,6 @@ Move from local backend assumptions to a hosted backend that the simulator and p
 
 ## Honest note
 This checklist assumes backend deployment is real and reachable. It does not pretend that local `localhost` behavior proves real device readiness.
+
+For the shortest operator path, use:
+- `GO_LIVE_CHECKLIST.md`
