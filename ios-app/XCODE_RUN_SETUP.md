@@ -50,10 +50,22 @@ Use that for:
 - Mac simulator pointing at LAN/hosted backend
 - physical iPhone pointing at hosted backend
 
+### Setting `FOOTWEAR_BACKEND_URL` in Xcode
+1. Open the scheme for the app target
+2. Edit Scheme
+3. Select Run
+4. Open the Environment Variables section
+5. Add:
+   - `FOOTWEAR_BACKEND_URL`
+   - value: your hosted HTTPS backend URL (example: `https://footwear-intelligence-backend.onrender.com`)
+6. Re-run the app
+
 For hosted-device testing, prefer a real hosted URL instead of LAN-only assumptions.
 See also:
 - `../HOSTED_RUNTIME_SWITCHOVER_CHECKLIST.md`
 - `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
+- `../RAILWAY_SETUP.md`
+- `../RENDER_SETUP.md`
 
 ### 6. Run backend first
 Use the backend README instructions before launching the app.

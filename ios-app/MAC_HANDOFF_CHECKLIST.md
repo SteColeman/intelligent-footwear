@@ -22,6 +22,7 @@ Use this when the project is pushed to GitHub and opened on a Mac.
 - [ ] add HealthKit capability
 - [ ] add `NSHealthShareUsageDescription`
 - [ ] set backend URL if needed for simulator/device (`FOOTWEAR_BACKEND_URL` supported)
+- [ ] for hosted testing, set `FOOTWEAR_BACKEND_URL` to the real deployed HTTPS backend URL
 - [ ] boot app to loading state
 - [ ] confirm session bootstrap resolves cleanly or fails clearly
 - [ ] confirm onboarding path works

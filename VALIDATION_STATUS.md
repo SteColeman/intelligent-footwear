@@ -42,6 +42,7 @@ This is still a **connected prototype**, not a fully validated MVP.
 - no `docker` available in this environment
 - no local PostgreSQL runtime available in this environment
 - true backend validation from here remains environment-limited
+- hosted provider/account actions still require real provider access to complete
 
 ## Honest summary
 The prototype is materially more real than the old docs suggest:
@@ -62,4 +63,8 @@ What is still missing is **repeatable runtime hardening**, not basic project exi
 
 ## Supporting reference docs
 - `HANDOFF_READINESS.md`
+- `HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
+- `HOSTED_RUNTIME_SWITCHOVER_CHECKLIST.md`
+- `RAILWAY_SETUP.md`
+- `RENDER_SETUP.md`
 - `ios-app/PROJECT_STATUS.md`

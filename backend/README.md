@@ -45,6 +45,9 @@ npm run start
 
 See also:
 - `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
+- `../RAILWAY_SETUP.md`
+- `../RENDER_SETUP.md`
+- `.env.hosted.example`
 
 ## Demo user
 The prototype currently uses:

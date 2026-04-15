@@ -12,6 +12,10 @@ Good options:
 - Railway
 - Render
 
+Provider-specific runbooks:
+- `RAILWAY_SETUP.md`
+- `RENDER_SETUP.md`
+
 This project does not need a fancy platform decision yet. It needs the fastest path to a reachable, honest MVP backend.
 
 ## Preferred order

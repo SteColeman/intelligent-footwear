@@ -18,9 +18,10 @@ GitHub repo:
 The repo/bootstrap question is no longer the blocker.
 
 The real active concerns are now:
-1. runtime hardening
-2. design tightening based on real device feedback
-3. keeping docs/status honest as the prototype evolves
+1. hosted backend + hosted DB deployment
+2. runtime hardening against the hosted/device path
+3. design tightening based on real device feedback
+4. keeping docs/status honest as the prototype evolves
 
 ## Current packaging improvements already landed
 - `.gitignore` excludes obvious generated/runtime clutter like `backend/node_modules/` and `backend/.env`
@@ -31,4 +32,4 @@ The real active concerns are now:
 ## Honest summary
 Repository setup is no longer a meaningful risk area for this project.
 The repo is live, active, and usable.
-The meaningful risks now are in runtime stability and feature validation, not version-control setup.
+The meaningful risks now are in hosted runtime setup, runtime stability, and feature validation — not version-control setup.

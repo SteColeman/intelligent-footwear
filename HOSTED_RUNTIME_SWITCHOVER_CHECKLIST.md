@@ -14,7 +14,7 @@ Move from local backend assumptions to a hosted backend that the simulator and p
 - [ ] confirm `/me?authProviderId=demo-user`
 
 ## App switchover
-- [ ] set `FOOTWEAR_BACKEND_URL` in Xcode scheme environment
+- [ ] set `FOOTWEAR_BACKEND_URL` in Xcode scheme environment to the real hosted HTTPS backend URL
 - [ ] confirm simulator can reach hosted backend
 - [ ] confirm physical iPhone can reach hosted backend
 - [ ] complete onboarding against hosted backend

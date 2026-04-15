@@ -68,6 +68,14 @@ All of the following should be true:
 ## Current recommendation
 Do not spend time on theoretical handoff work anymore.
 The next useful work is:
-1. repeated runtime hardening on Mac/device
-2. product-level UX tightening where real testing exposes rough edges
-3. continued validation of the new photo and onboarding persistence paths
+1. complete hosted backend + hosted Postgres setup
+2. switch simulator/device to the hosted backend URL
+3. run repeated runtime hardening on Mac/device against that hosted runtime
+4. tighten UX where real testing exposes rough edges
+5. continue validation of the newer photo, lifecycle-state, and onboarding persistence paths
+
+## Hosted-runtime reference docs
+- `HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
+- `HOSTED_RUNTIME_SWITCHOVER_CHECKLIST.md`
+- `RAILWAY_SETUP.md`
+- `RENDER_SETUP.md`
