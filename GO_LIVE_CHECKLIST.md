@@ -88,3 +88,9 @@ Pay extra attention to:
 
 ## Honest note
 The plan is not complete until this checklist has been executed against a real hosted backend and a real physical device.
+
+Reference docs:
+- `HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
+- `HOSTED_RUNTIME_SWITCHOVER_CHECKLIST.md`
+- `RAILWAY_SETUP.md`
+- `RENDER_SETUP.md`

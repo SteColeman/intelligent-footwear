@@ -75,8 +75,11 @@ curl -X POST http://localhost:3000/dev/bootstrap-demo-user
 curl "http://localhost:3000/me?authProviderId=demo-user"
 ```
 
-For a fuller sequence use:
+For a fuller local/manual sequence use:
 - `QUICK_API_SMOKE_TESTS.md`
+
+For hosted verification, prefer:
+- `BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted`
 
 ## Error shape
 App-level errors return:

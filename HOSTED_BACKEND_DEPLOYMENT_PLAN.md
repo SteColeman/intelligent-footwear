@@ -36,10 +36,10 @@ This project does not need a fancy platform decision yet. It needs the fastest p
 - any future CORS/base-url config if needed
 
 ## Current backend gaps before hosted deployment
-- migration flow is still named for local dev use (`prisma migrate dev`)
-- no explicit production migration/deploy script yet
+- primary migration flow is still also used in local-dev form (`prisma migrate dev`)
 - docs still assume local Docker in several places
-- no checked-in hosted deployment runbook existed before this file
+- real hosted deployment still needs to be executed against an actual provider account
+- real device validation still needs to happen against the hosted runtime
 
 ## Minimum hosted deployment checklist
 - [ ] hosted Postgres provisioned
@@ -60,6 +60,13 @@ This project does not need a fancy platform decision yet. It needs the fastest p
 - Post-deploy migration command: `npm run prisma:migrate:deploy`
 
 ## Smoke test after deployment
+Fastest path:
+```bash
+cd mvp-build/backend
+BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted
+```
+
+Manual route checks if needed:
 - `GET /health`
 - `GET /`
 - `POST /dev/bootstrap-demo-user`
