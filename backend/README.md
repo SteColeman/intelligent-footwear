@@ -43,6 +43,11 @@ npm run prisma:migrate:deploy
 npm run start
 ```
 
+After deploy, you can run a scripted hosted smoke test:
+```bash
+BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted
+```
+
 See also:
 - `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
 - `../RAILWAY_SETUP.md`

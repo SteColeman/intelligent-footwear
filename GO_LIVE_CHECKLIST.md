@@ -32,13 +32,17 @@ Reference:
 - `backend/.env.hosted.example`
 
 ## 5. Verify backend
-Run these checks against the hosted URL:
+Fastest path:
+```bash
+cd mvp-build/backend
+BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted
+```
+
+Manual checks if needed:
 - `/health`
 - `/`
 - `POST /dev/bootstrap-demo-user`
 - `GET /me?authProviderId=demo-user`
-
-Then verify key product routes:
 - `POST /me/onboarding-complete`
 - `POST /me/health-connected`
 - `POST /footwear`
