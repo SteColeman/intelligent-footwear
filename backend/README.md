@@ -48,6 +48,11 @@ After deploy, you can run a scripted hosted smoke test:
 BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted
 ```
 
+Or use the tiny wrapper:
+```bash
+./scripts/run-hosted-smoke-test.sh https://your-hosted-backend.example.com
+```
+
 See also:
 - `../HOSTED_BACKEND_DEPLOYMENT_PLAN.md`
 - `../RAILWAY_SETUP.md`

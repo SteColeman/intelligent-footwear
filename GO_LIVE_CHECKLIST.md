@@ -35,6 +35,11 @@ Reference:
 Fastest path:
 ```bash
 cd mvp-build/backend
+./scripts/run-hosted-smoke-test.sh https://your-hosted-backend.example.com
+```
+
+Equivalent direct command:
+```bash
 BACKEND_BASE_URL=https://your-hosted-backend.example.com npm run smoke:hosted
 ```
 
